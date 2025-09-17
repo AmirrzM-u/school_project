@@ -20,6 +20,13 @@ class User(AbstractUser):
     profile_pic = models.ImageField(upload_to=profile_img_upload_to, blank=True, null=True, verbose_name='عکس پروفایل')
     date_of_birth = jmodels.jDateField(null=True, blank=True, verbose_name='تاریخ تولد')
     age = models.CharField(max_length=2, blank=True, null=True, verbose_name='سن')
+    class UserTypes(models.TextChoices):
+        TEACHER = 'tch', 'teacher'
+        STUDENT = 'std', 'student'
+        PARENT = 'prn', 'parent'
+    user_type = models.CharField(max_length=3, choices=UserTypes, verbose_name='نوع کاربر')
+    class Meta:
+        verbose_name_plural = 'کاربران'
 
 class StudentAccount(models.Model):
     student = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_account', verbose_name='دانش آموز')
@@ -35,9 +42,9 @@ class StudentAccount(models.Model):
     graduated = models.BooleanField(default=False, verbose_name='وضعیت فارغ التحصیلی')
     current_student = models.BooleanField(default=True, verbose_name='دانش آموز فعلی')
     student_class = models.ForeignKey('Class', on_delete=models.PROTECT, related_name='students', verbose_name='کلاس دانش آموز')
-    student_teachers = models.ManyToManyField('TeacherAccount',  related_name='students', verbose_name='معلم های دانش آموز')
-    student_lessons = models.ManyToManyField('Lesson', related_name='students')
-    extra_detail = models.CharField(verbose_name='اطلاعات اضافه')
+    student_teachers = models.ManyToManyField('TeacherAccount',  related_name='students', verbose_name='معلم های دانش آموز', blank=True, null=True)
+    student_lessons = models.ManyToManyField('Lesson', related_name='students', blank=True, null=True)
+    extra_detail = models.CharField(verbose_name='اطلاعات اضافه', blank=True, null=True)
 
     class Meta:
         ordering = ['-entry'] 
@@ -52,7 +59,7 @@ class StudentAccount(models.Model):
 class ParentAccount(models.Model):
     parent = models.OneToOneField(User, on_delete=models.CASCADE, related_name='parent_account', verbose_name='والدین')
     parent_of = models.OneToOneField(StudentAccount, on_delete=models.CASCADE, related_name='parent')
-    extra_detail = models.CharField(verbose_name='اطلاعات اضافه')
+    extra_detail = models.CharField(verbose_name='اطلاعات اضافه', null=True, blank=True)
     
     class Meta:
         verbose_name_plural = 'والدین'
@@ -61,7 +68,7 @@ class ParentAccount(models.Model):
 
 class TeacherAccount(models.Model):
     teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_account')
-    lessons = models.ManyToManyField('Lesson', related_name='teachers')
+    lessons = models.ManyToManyField('Lesson', related_name='teachers', null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'معلم'
