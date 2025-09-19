@@ -53,7 +53,6 @@ class UserPanelAdmin(UserAdmin):
                 elif inline_class is ParentAccountInline and target_type == 'prn':
                     should_include = True
 
-            # If the inline should be included, instantiate it and append to the return list
             if should_include:
                 inline = inline_class(self.model, self.admin_site)
                 inline_instances.append(inline)
@@ -70,11 +69,15 @@ class ClassPanleAdmin(admin.ModelAdmin):
 
     @admin.display(description='دانش آموزان کلاس')
     def class_students(self, instance):
-        return list(f"{student.student.first_name} {student.student.last_name}" for student in instance.students.all())
+        students = instance.students.filter(current_student=True, graduated=False)
+        return list(f"{student.student.first_name} {student.student.last_name}" for student in students)
 
-    @admin.display(empty_value='students_number')
+    @admin.display(empty_value='بدون دانش آموز')
     def students_number(self, obj):
         return obj.students.all().count()
     
     students_number.short_description = 'تعداد دانش آموزان'
 
+@admin.register(Lesson)
+class LessonPanelAdmin(admin.ModelAdmin):
+    list_display = []

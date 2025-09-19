@@ -45,6 +45,13 @@ class StudentAccount(models.Model):
     student_teachers = models.ManyToManyField('TeacherAccount',  related_name='students', verbose_name='معلم های دانش آموز', blank=True, null=True)
     student_lessons = models.ManyToManyField('Lesson', related_name='students', blank=True, null=True)
     extra_detail = models.CharField(verbose_name='اطلاعات اضافه', blank=True, null=True)
+    
+    class ActiveStudentManager(models.Manager):
+        def get_queryset(self):
+            return super().get_queryset().filter(current_student=True, graduated=False)
+    
+    objects = jmodels.jManager()
+    active = ActiveStudentManager()
 
     class Meta:
         ordering = ['-entry'] 
