@@ -74,7 +74,6 @@ class ParentAccount(models.Model):
 
 class TeacherAccount(models.Model):
     teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_account')
-    lessons = models.ManyToManyField('Lesson', related_name='teachers', null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'معلم'
@@ -83,8 +82,9 @@ class TeacherAccount(models.Model):
 
 class Lesson(models.Model):
     title = models.CharField(max_length=150, verbose_name='نام درس')
-    teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='lessons')
-    student = models.ForeignKey(StudentAccount, on_delete=models.CASCADE, related_name='lessons')
+    lesson_teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='lessons')
+    lesson_student = models.ForeignKey(StudentAccount, on_delete=models.CASCADE, related_name='lessons')
+    student_grade = models.PositiveSmallIntegerField(default=0, verbose_name='نمره دانش آموز')
     class GRADE_LEVELS(models.TextChoices):
         GRADE_10 = '10', 'Grade_10'
         GRADE_11 = '11', 'Grade_11'
