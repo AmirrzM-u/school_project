@@ -42,8 +42,7 @@ class StudentAccount(models.Model):
     graduated = models.BooleanField(default=False, verbose_name='وضعیت فارغ التحصیلی')
     current_student = models.BooleanField(default=True, verbose_name='دانش آموز فعلی')
     student_class = models.ForeignKey('Class', on_delete=models.PROTECT, related_name='students', verbose_name='کلاس دانش آموز')
-    student_teachers = models.ManyToManyField('TeacherAccount',  related_name='students', verbose_name='معلم های دانش آموز', blank=True, null=True)
-    student_lessons = models.ManyToManyField('Lesson', related_name='students', blank=True, null=True)
+    student_lessons = models.ManyToManyField('TeacherAccount', through='Lesson', related_name='students', blank=True, null=True)
     extra_detail = models.CharField(verbose_name='اطلاعات اضافه', blank=True, null=True)
     
     class ActiveStudentManager(models.Manager):
@@ -84,6 +83,8 @@ class TeacherAccount(models.Model):
 
 class Lesson(models.Model):
     title = models.CharField(max_length=150, verbose_name='نام درس')
+    teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='lessons')
+    student = models.ForeignKey(StudentAccount, on_delete=models.CASCADE, related_name='lessons')
     class GRADE_LEVELS(models.TextChoices):
         GRADE_10 = '10', 'Grade_10'
         GRADE_11 = '11', 'Grade_11'
