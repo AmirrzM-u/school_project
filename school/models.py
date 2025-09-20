@@ -42,7 +42,7 @@ class StudentAccount(models.Model):
     graduated = models.BooleanField(default=False, verbose_name='وضعیت فارغ التحصیلی')
     current_student = models.BooleanField(default=True, verbose_name='دانش آموز فعلی')
     student_class = models.ForeignKey('Class', on_delete=models.PROTECT, related_name='students', verbose_name='کلاس دانش آموز')
-    student_lessons = models.ManyToManyField('TeacherAccount', through='Lesson', related_name='students', blank=True, null=True)
+    student_lessons = models.ManyToManyField('TeacherAccount', through='Lesson', related_name='students', blank=True, null=True, verbose_name='درس های دانش آموز')
     extra_detail = models.CharField(verbose_name='اطلاعات اضافه', blank=True, null=True)
     
     class ActiveStudentManager(models.Manager):
@@ -82,9 +82,11 @@ class TeacherAccount(models.Model):
 
 class Lesson(models.Model):
     title = models.CharField(max_length=150, verbose_name='نام درس')
-    lesson_teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='lessons')
-    lesson_student = models.ForeignKey(StudentAccount, on_delete=models.CASCADE, related_name='lessons')
+    lesson_teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='lessons', verbose_name='معلم این درس', null=True)
+    lesson_students = models.ForeignKey(StudentAccount, on_delete=models.CASCADE, related_name='lessons', verbose_name='دانش آموزان این درس', null=True)
     student_grade = models.PositiveSmallIntegerField(default=0, verbose_name='نمره دانش آموز')
+    term_time = jmodels.jDateField(default=timezone.now)
+    update = jmodels.jDateField(auto_now=True)
     class GRADE_LEVELS(models.TextChoices):
         GRADE_10 = '10', 'Grade_10'
         GRADE_11 = '11', 'Grade_11'
