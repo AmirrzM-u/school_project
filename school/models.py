@@ -5,6 +5,7 @@ from django.utils import timezone
 
 class Class(models.Model):
     class_number = models.CharField(max_length=3, verbose_name='شماره کلاس')
+    
     class Meta:
         verbose_name_plural = 'کلاس'
     def __str__(self):
@@ -13,7 +14,7 @@ class Class(models.Model):
 def profile_img_upload_to(instance, filename):
     user_first_name = instance.first_name
     user_last_name = instance.last_name
-    return f"profile_img/{user_first_name}-{user_last_name}"
+    return f"profile_img/{user_first_name}-{user_last_name}/{filename}"
 
 class User(AbstractUser):
     phone_number = models.CharField(max_length=11, verbose_name='شماره تلفن')
@@ -29,7 +30,7 @@ class User(AbstractUser):
         verbose_name_plural = 'کاربران'
 
 class StudentAccount(models.Model):
-    student = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_account', verbose_name='دانش آموز')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_account', verbose_name='کاربر')
     entry = jmodels.jDateField(default=timezone.now, verbose_name='سال روردی دانش آموز')
     avg_1 = models.PositiveIntegerField(default=0, verbose_name='معدل سال اول')
     avg_2 = models.PositiveIntegerField(default=0, verbose_name='معدل سال دوم')
@@ -43,7 +44,7 @@ class StudentAccount(models.Model):
     graduated = models.BooleanField(default=False, verbose_name='وضعیت فارغ التحصیلی')
     current_student = models.BooleanField(default=True, verbose_name='دانش آموز فعلی')
     student_class = models.ForeignKey('Class', on_delete=models.PROTECT, related_name='students', verbose_name='کلاس دانش آموز')
-    student_lessons = models.ManyToManyField('TeacherAccount', through='Lesson', related_name='students',  through_fields=('lesson_student', 'lesson_teacher'), blank=True, verbose_name='درس های دانش آموز')
+    student_term = models.ManyToManyField('TeacherAccount', through='StudentTerm', related_name='students',  through_fields=('lesson_student', 'lesson_teacher'), blank=True, verbose_name='درس های دانش آموز')
     extra_detail = models.CharField(verbose_name='اطلاعات اضافه', blank=True, null=True)
     
     class ActiveStudentManager(models.Manager):
@@ -54,49 +55,69 @@ class StudentAccount(models.Model):
     active = ActiveStudentManager()
 
     class Meta:
-        ordering = ['-entry'] 
+        ordering = ['entry'] 
         indexes = [
-            models.Index(fields=['student'])
+            models.Index(fields=['entry', 'user', 'grade_level'])
         ]
         verbose_name_plural = 'اکانت دانش آموز'
     
     def __str__(self):
-        return f"student: {self.student.first_name} {self.student.last_name}"
+        return f"std:{self.user.first_name}-{self.user.last_name}"
     
 class ParentAccount(models.Model):
-    parent = models.OneToOneField(User, on_delete=models.CASCADE, related_name='parent_account', verbose_name='والدین')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='parent_account', verbose_name='کاربر')
     extra_detail = models.CharField(verbose_name='اطلاعات اضافه', null=True, blank=True)
     
     class Meta:
         verbose_name_plural = 'والدین'
     def __str__(self):
-        return f"parent Mr/Ms {self.parent.last_name}"
+        return f"Mr/Ms {self.user.last_name}"
 
 class TeacherAccount(models.Model):
-    teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_account')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_account', verbose_name='کاربر')
 
     class Meta:
         verbose_name_plural = 'معلم'
     def __str__(self):
-        return f"teacher: {self.teacher.last_name}"
+        return f"teacher: {self.user.last_name}"
 
+class StudentTerm(models.Model):
+    term_lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE, related_name='student_term', verbose_name='درس')
+    lesson_teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='lessons', verbose_name='معلم این درس')
+    lesson_student = models.ForeignKey(StudentAccount, on_delete=models.CASCADE, related_name='lessons', verbose_name='دانش آموز این درس')
+    student_score = models.PositiveSmallIntegerField(default=0, verbose_name='نمره دانش آموز')
+    term_time = jmodels.jDateField(default=timezone.now, verbose_name='تاریخ')
+    update = jmodels.jDateField(auto_now=True, verbose_name='اخرین بروزرسانی')
+
+    objects = jmodels.jManager()
+
+    class Meta:
+        ordering = ['lesson_teacher']
+        indexes = [
+            models.Index(fields=['lesson_teacher', 'term_lesson'])
+        ]
+        verbose_name_plural = 'سال تحصیلی دانش آموز'
+    def __str__(self):
+        return f"lesson: {self.title}"
+    
 class Lesson(models.Model):
     title = models.CharField(max_length=150, verbose_name='نام درس')
-    lesson_teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='lessons', verbose_name='معلم این درس')
-    lesson_student = models.ForeignKey(StudentAccount, on_delete=models.CASCADE, related_name='lessons', verbose_name='دانش آموزان این درس')
-    student_grade = models.PositiveSmallIntegerField(default=0, verbose_name='نمره دانش آموز')
-    term_time = jmodels.jDateField(default=timezone.now)
-    update = jmodels.jDateField(auto_now=True)
     class GRADE_LEVELS(models.TextChoices):
         GRADE_10 = '10', 'Grade_10'
         GRADE_11 = '11', 'Grade_11'
         GRADE_12 = '12', 'Grade_12'
     grade_level = models.CharField(max_length=2, choices=GRADE_LEVELS, verbose_name='پایه درس')
+    lesson_times = models.CharField(max_length=500, verbose_name='ساعت و روز های درس')
+    update = jmodels.jDateField(auto_now=True, verbose_name='اخرین بروزرسانی')
+
+    objects = jmodels.jManager()
 
     class Meta:
         verbose_name_plural = 'درس'
     def __str__(self):
         return f"lesson: {self.title}"
+            
+
 
 
 
