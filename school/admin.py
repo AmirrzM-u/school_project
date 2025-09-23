@@ -1,8 +1,6 @@
 from django.contrib import admin
 from .models import *
 from django.contrib.auth.admin import UserAdmin
-from django.utils.html import format_html_join
-from django.utils.safestring import mark_safe
 
 class StudentAccountInline(admin.StackedInline):
     model = StudentAccount
@@ -22,6 +20,7 @@ class ParentAccountInline(admin.StackedInline):
 @admin.register(User)
 class UserPanelAdmin(UserAdmin):
     list_display = ['last_name', 'first_name', 'email', 'user_type']
+    ordering = ['user_type']
     fieldsets = list(UserAdmin.fieldsets) + [
         (
             'user info', {
@@ -59,6 +58,37 @@ class UserPanelAdmin(UserAdmin):
 
         return inline_instances
 
+@admin.register(ParentAccount)
+class ParentPanelAdmin(admin.ModelAdmin):
+    list_display = ['user']
+    search_fields = ['user']
+    readonly_fields = ['children']
+
+    @admin.display(description='فرزندان')
+    def chidren(self, instance):
+        childrens = instance.children.all()
+        return list(f"{children.user.first_name}-{children.user.last_name}" for children in childrens)
+
+@admin.register(TeacherAccount)
+class TeacherPanelAdmin(admin.ModelAdmin):
+    list_display = ['user']
+    search_fields = ['user']
+    readonly_fields = ['students']
+
+    @admin.display(description='دانش آموزان')
+    def students(self, instance):
+        students = instance.term.term_student.all()
+        return list(f"{student.user.first_name}-{student.user.last_name}" for student in students)
+ 
+
+@admin.register(StudentAccount)
+class StudentPanelAdmin(admin.ModelAdmin):
+    list_display = ['user', 'grade_level', 'entry_year', 'current_student', 'graduated']
+
+    @admin.display(description='سال ورودی')
+    def entry_year(self, instance):
+        year = instance.entry.year
+        return str(year)
 
 
 @admin.register(Class)
@@ -70,7 +100,7 @@ class ClassPanleAdmin(admin.ModelAdmin):
     @admin.display(description='دانش آموزان کلاس')
     def class_students(self, instance):
         students = instance.students.filter(current_student=True, graduated=False)
-        return list(f"{student.student.first_name} {student.student.last_name}" for student in students)
+        return list(f"{student.user.first_name} {student.user.last_name}" for student in students)
 
     @admin.display(empty_value='بدون دانش آموز')
     def students_number(self, obj):
@@ -80,4 +110,8 @@ class ClassPanleAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonPanelAdmin(admin.ModelAdmin):
-    list_display = []
+    list_display = ['title', 'grade_level']
+
+# @admin.register(StudentTerm)
+# class TermPanelAdmin(admin.ModelAdmin):
+#     pass
