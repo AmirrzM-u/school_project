@@ -1,6 +1,12 @@
 from django.contrib import admin
 from .models import *
 from django.contrib.auth.admin import UserAdmin
+from django_jalali.admin.filters import JDateFieldListFilter
+
+class ManagerAccountInline(admin.StackedInline):
+    model = ManagerAccount
+    extra = 0
+    max_num = 1
 
 class StudentAccountInline(admin.StackedInline):
     model = StudentAccount
@@ -20,17 +26,18 @@ class ParentAccountInline(admin.StackedInline):
 @admin.register(User)
 class UserPanelAdmin(UserAdmin):
     list_display = ['last_name', 'first_name', 'email', 'user_type']
+    search_fields = ['last_name', 'first_name', 'email', 'user_type']
     ordering = ['user_type']
     fieldsets = list(UserAdmin.fieldsets) + [
         (
             'user info', {
                 'fields':(
-                    'phone_number', 'date_of_birth', 'age', 'user_type'
+                    'phone_number', 'date_of_birth', 'user_type'
                 )
             }
         )
     ]
-    inlines = [StudentAccountInline, TeacherAccountInline, ParentAccountInline]
+    inlines = [ManagerAccountInline, StudentAccountInline, TeacherAccountInline, ParentAccountInline]
 
     def get_inline_instances(self, request, obj=None):  
         inline_instances = []
@@ -45,7 +52,9 @@ class UserPanelAdmin(UserAdmin):
             should_include = False
 
             if target_type:
-                if inline_class is StudentAccountInline and target_type =='std':
+                if inline_class is ManagerAccountInline and target_type == 'mng':
+                    should_include = True
+                elif inline_class is StudentAccountInline and target_type =='std':
                     should_include = True
                 elif inline_class is TeacherAccountInline and target_type == 'tch':
                     should_include = True
@@ -61,38 +70,44 @@ class UserPanelAdmin(UserAdmin):
 @admin.register(ParentAccount)
 class ParentPanelAdmin(admin.ModelAdmin):
     list_display = ['user']
-    search_fields = ['user']
+    search_fields = ['user__first_name', 'user__last_name']
     readonly_fields = ['children']
 
     @admin.display(description='فرزندان')
-    def chidren(self, instance):
+    def children(self, instance):
         childrens = instance.children.all()
         return list(f"{children.user.first_name}-{children.user.last_name}" for children in childrens)
 
 @admin.register(TeacherAccount)
 class TeacherPanelAdmin(admin.ModelAdmin):
     list_display = ['user']
-    search_fields = ['user']
+    search_fields = ['user__first_name', 'user__last_name']
     readonly_fields = ['students']
 
     @admin.display(description='دانش آموزان')
     def students(self, instance):
-        students = instance.term.term_student.all()
+        terms = instance.term.select_related('term_student__user').all()
+        students = [term.term_student for term in terms if term.term_student.current_student and not term.term_student.graduated]
         return list(f"{student.user.first_name}-{student.user.last_name}" for student in students)
  
 
 @admin.register(StudentAccount)
 class StudentPanelAdmin(admin.ModelAdmin):
-    list_display = ['user', 'grade_level', 'entry_year', 'current_student', 'graduated']
-
     @admin.display(description='سال ورودی')
     def entry_year(self, instance):
         year = instance.entry.year
-        return str(year)
+        return year
+    
+    list_display = ['user', 'grade_level', 'entry_year', 'current_student', 'graduated']
+    ordering = ['current_student', '-graduated', 'entry', 'grade_level', 'student_class']
+    list_filter = [('entry', JDateFieldListFilter), 'student_class', 'grade_level']
+    search_fields = ['user__first_name', 'user__last_name', 'grade_level']
+
+    
 
 
-@admin.register(Class)
-class ClassPanleAdmin(admin.ModelAdmin):
+@admin.register(Classroom)
+class ClassroomPanleAdmin(admin.ModelAdmin):
     list_display = ['class_number', 'students_number']
     # fields = ['class_number', 'students_number']
     readonly_fields = ['class_students']
@@ -103,15 +118,25 @@ class ClassPanleAdmin(admin.ModelAdmin):
         return list(f"{student.user.first_name} {student.user.last_name}" for student in students)
 
     @admin.display(empty_value='بدون دانش آموز')
-    def students_number(self, obj):
-        return obj.students.all().count()
+    def students_number(self, instance):
+        return instance.students.filter(current_student=True, graduated=False).count()
     
     students_number.short_description = 'تعداد دانش آموزان'
 
 @admin.register(Lesson)
 class LessonPanelAdmin(admin.ModelAdmin):
-    list_display = ['title', 'grade_level']
+    list_display = ['title', 'grade_level', 'lesson_times']
 
-# @admin.register(StudentTerm)
-# class TermPanelAdmin(admin.ModelAdmin):
-#     pass
+@admin.register(StudentTerm)
+class TermPanelAdmin(admin.ModelAdmin):
+    
+    @admin.display(description='سال')
+    def term_year(self, instance):
+        term_year = instance.term_time.year
+        return term_year
+    
+    list_display = ['term_student', 'term_lesson', 'term_teacher', 'student_score', 'term_year']
+    ordering = ['term_time', 'term_lesson', 'term_teacher', 'student_score']
+    list_filter = ['term_student', 'term_lesson', 'term_teacher', 'student_score', ('term_time', JDateFieldListFilter)]
+    search_fields = ['term_student__user__first_name', 'term_student__user__last_name', 'term_lesson__title', 'term_teacher__user__last_name']
+
