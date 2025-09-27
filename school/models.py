@@ -46,6 +46,7 @@ class User(AbstractUser):
     
 class ManagerAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='manager_account', verbose_name='کاربر')
+    id_manager = models.PositiveSmallIntegerField(default=0, verbose_name='شناسه مدیر')
 
     class Meta:
         verbose_name_plural = 'اکانت مدیر'
@@ -55,6 +56,7 @@ class ManagerAccount(models.Model):
 
 class StudentAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_account', verbose_name='کاربر')
+    id_student = models.PositiveSmallIntegerField(default=0, verbose_name='شناسه دانش آموز')
     entry = jmodels.jDateField(default=timezone.now, verbose_name='سال روردی دانش آموز')
     avg_1 = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(20)], verbose_name='معدل سال اول')
     avg_2 = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(20)], verbose_name='معدل سال دوم')
@@ -106,6 +108,7 @@ class ParentAccount(models.Model):
 
 class TeacherAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_account', verbose_name='کاربر')
+    id_teacher = models.PositiveSmallIntegerField(default=0, verbose_name='شناسه معلم')
     extra_detail = models.CharField(max_length=500, verbose_name='اطلاعات اضافه', null=True, blank=True)
 
     class Meta:

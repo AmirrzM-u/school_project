@@ -140,3 +140,7 @@ class TermPanelAdmin(admin.ModelAdmin):
     list_filter = ['term_student', 'term_lesson', 'term_teacher', 'student_score', ('term_time', JDateFieldListFilter)]
     search_fields = ['term_student__user__first_name', 'term_student__user__last_name', 'term_lesson__title', 'term_teacher__user__last_name']
 
+# @admin.register(ManagerAccount)
+# class ManagerPanelAdmin(admin.ModelAdmin):
+#     list_display = ['id_manager']
+
