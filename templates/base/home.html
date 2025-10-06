@@ -1,0 +1,44 @@
+{% extends 'base/base.html' %}
+
+{% block title %} Home {% endblock %}
+
+{% block content %}
+    <h2 class="welcom_container">به وبسایت دبیرستان خوش آمدید</h2>
+
+    <div class="school_news_title_container">
+        {% for news in school_news.all %}
+            <div class="news_title_container">
+                <h4 class="title_container">{{ news.title }}</h4>
+            </div>
+            <div class="news_image_container">
+                <img src="{{ news.title_image.url }}" alt="{{ news.title }}">
+            </div>
+        {% endfor %}
+    </div>
+    <div class="student_number_container">
+        <div class="student_number_image_container">
+            <img src="" alt="">
+        </div>
+        <div class="student_number">
+            {{ student_number }}
+        </div>
+    </div>
+        <div class="class_number_container">
+        <div class="class_number_image_container">
+            <img src="" alt="">
+        </div>
+        <div class="class_number">
+            {{ class_number }}
+        </div>
+    </div>
+        <div class="teacher_number_container">
+        <div class="teacher_number_image_container">
+            <img src="" alt="">
+        </div>
+        <div class="teacher_number">
+            {{ teachers_number }}
+        </div>
+    </div>
+
+
+{% endblock content %}

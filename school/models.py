@@ -56,12 +56,12 @@ class ManagerAccount(models.Model):
 
 class StudentAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_account', verbose_name='کاربر')
-    id_student = models.PositiveSmallIntegerField(default=0, verbose_name='شناسه دانش آموز')
+    id_student = models.PositiveIntegerField(default=0, unique=True, verbose_name='شناسه دانش آموز')
     entry = jmodels.jDateField(default=timezone.now, verbose_name='سال روردی دانش آموز')
     avg_1 = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(20)], verbose_name='معدل سال اول')
     avg_2 = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(20)], verbose_name='معدل سال دوم')
     avg_3 = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(20)], verbose_name='معدل سال سوم')
-    student_parent = models.ForeignKey('ParentAccount', on_delete=models.PROTECT, related_name='children', verbose_name='والد دانش آموز')
+    student_parent = models.ForeignKey('ParentAccount', on_delete=models.PROTECT, related_name='children', null=True, blank=True, verbose_name='والد دانش آموز')
     class GRADE_LEVELS(models.TextChoices):
         GRADE_10 = '10', 'Grade_10'
         GRADE_11 = '11', 'Grade_11'
@@ -84,7 +84,6 @@ class StudentAccount(models.Model):
     def entry_year(self):
         entry_year = self.entry.year
         return entry_year
-
 
     class Meta:
         ordering = ['entry'] 
@@ -119,12 +118,11 @@ class TeacherAccount(models.Model):
 
 class StudentTerm(models.Model):
     term_lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE, related_name='student_term', verbose_name='درس')
-    term_teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='term', verbose_name='معلم این درس')
-    term_student = models.ForeignKey(StudentAccount, on_delete=models.CASCADE, related_name='term', verbose_name='دانش آموز این درس')
+    term_teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='term_teacher', verbose_name='معلم این درس')
+    term_student = models.ForeignKey(StudentAccount, on_delete=models.CASCADE, related_name='term_student', verbose_name='دانش آموز این درس')
     student_score = models.PositiveSmallIntegerField(default=0, validators=[MaxValueValidator(20)], verbose_name='نمره دانش آموز')
     term_time = jmodels.jDateField(default=timezone.now, verbose_name='تاریخ')
     update = jmodels.jDateField(auto_now=True, verbose_name='اخرین بروزرسانی')
-
     objects = jmodels.jManager()
 
     @property
@@ -158,8 +156,60 @@ class Lesson(models.Model):
         verbose_name_plural = 'درس'
     def __str__(self):
         return f"lesson: {self.title}"
-            
 
+def school_news_title_img_upload_to(instance, filename):
+    title = instance.title
+    return f"news_imgs/{title}/{filename}"
+def school_news_img_upload_to(instance, filename):
+    title = instance.title
+    return f"news_imgs/{title}-description_photos/{filename}"
+
+class SchoolNews(models.Model):
+    title = models.CharField(max_length=100, verbose_name='موضوع')
+    title_image = models.ImageField(upload_to=school_news_title_img_upload_to)
+    description = models.CharField(max_length=1000, verbose_name='توضیحات')
+    date = jmodels.jDateTimeField(default=timezone.now, verbose_name='تاریخ')
+
+    class Meta:
+        ordering = ['date']
+        indexes = [
+            models.Index(fields=['date'])
+        ]
+        verbose_name_plural = 'اخبار دبیرستان'
+
+    def __str__(self):
+        return f"{self.title}"
+    
+
+def school_news_img_description_upload_to(instance, filename):
+    title = instance.title
+    return f"new_imgs/{title}-description_photos/{filename}"
+
+class ImageModel(models.Model):
+    title = models.CharField(max_length=100, verbose_name='توضیحات عکس')
+    news = models.ForeignKey(SchoolNews, on_delete=models.CASCADE, related_name='news', verbose_name='خبر')
+    image = models.ImageField(upload_to=school_news_img_description_upload_to)
+
+class Ticket(models.Model):
+    parent = models.ForeignKey(ParentAccount, on_delete=models.CASCADE, related_name='parent_tickets', verbose_name='والد')
+    teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='teacher_tickets', verbose_name='معلم')
+    title = models.CharField(max_length=200, verbose_name='موضوع')
+    description = models.CharField(max_length=1000, verbose_name='توضیحات')
+    class Status(models.TextChoices):
+        CHECKED = 'true', 'Checked'
+        NOT_CHECKED = 'false', "Not checked"
+    status = models.CharField(max_length=5, choices=Status, default=Status.NOT_CHECKED, verbose_name='وضعیت')
+    response = models.CharField(max_length=1000, verbose_name='پاسخ معلم')
+    
+    class Meta:
+        ordering = ['status']
+        indexes = [
+            models.Index(fields=['status'])
+        ]
+        verbose_name_plural = 'پیام'
+
+    def __str__(self):
+        return f"parent: {self.parent.user.last_name}-{self.title} to: {self.teacher.user.last_name}"
 
 
 
