@@ -1,0 +1,20 @@
+{% extends "base/base.html" %}
+
+{% block title %} news {% endblock title %}
+
+{% block content %}
+<div class="detail_news_container">
+    <div class="detail_news_title_container">
+        <h3 class="detail_news_title">{{ news.title }}</h3>
+    </div>
+    <div class="detail_news_image_container">
+        <img class="detail_news_image_container" src="{{ news.title_image.url }}" alt="{{ news.title }}">
+    </div>
+    <div class="detail_news_decription_container">
+        <p class="detail_news_description">{{ news.description }}</p>
+        {% for news_image in news.description_image.all %}
+            <img class="detail_news_description_image" src="{{ news_image.image.url }}" alt="{{ news_image.title }}">
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

@@ -5,13 +5,13 @@
 {% block content %}
     <h2 class="welcom_container">به وبسایت دبیرستان خوش آمدید</h2>
 
-    <div class="school_news_title_container">
+    <div class="school_news_container">
         {% for news in school_news.all %}
             <div class="news_title_container">
-                <h4 class="title_container">{{ news.title }}</h4>
+                <a class="link_news_title_container" href="{% url 'news_details' news.id %}"><h4 class="news_title">{{ news.title }}</h4></a>
             </div>
             <div class="news_image_container">
-                <img src="{{ news.title_image.url }}" alt="{{ news.title }}">
+                <a class="link_image_container" href="{% url 'news_details' news.id %}"><img class="news_image" src="{{ news.title_image.url }}" alt="{{ news.title }}"></a>
             </div>
         {% endfor %}
     </div>

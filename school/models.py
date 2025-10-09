@@ -187,7 +187,7 @@ def school_news_img_description_upload_to(instance, filename):
 
 class ImageModel(models.Model):
     title = models.CharField(max_length=100, verbose_name='توضیحات عکس')
-    news = models.ForeignKey(SchoolNews, on_delete=models.CASCADE, related_name='news', verbose_name='خبر')
+    news = models.ForeignKey(SchoolNews, on_delete=models.CASCADE, related_name='description_image', verbose_name='خبر')
     image = models.ImageField(upload_to=school_news_img_description_upload_to)
 
 class Ticket(models.Model):
