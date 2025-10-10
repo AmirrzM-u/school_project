@@ -1,0 +1,43 @@
+{% extends 'base/base.html' %}
+
+{% block title %} profile {% endblock %}
+
+{% block content %}
+
+    {% if user.user_type == 'std' %}
+        <div  class="student_grade_container">
+            <table class="student_grade_table">
+                {% for term in user.student_account.term_student.all %}
+                <tr class="row_names_container">
+                    <th class="row_name">درس</th>
+                    <th class="row_name">نمره</th>
+                    <th class="row_name">نام معلم</th>
+                </tr>
+                <tr class="lessons_table">
+                    <td class="lessons">{{ term.term_lesson.title }}</td>
+                </tr>
+                <tr class="grades_table">
+                    <td class="grades">{{ term.student_score }}</td>
+                </tr>
+                <tr class="teachers_table">
+                    <td class="teachers"><a href="">{{ term.term_teacher.user.last_name }}</a></td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
+
+    {% if user.user_type == 'tch' %}
+        
+    {% endif %}
+
+    {% if user.user_type == 'prn' %}
+        
+    {% endif %}
+
+
+
+
+
+
+{% endblock content %}

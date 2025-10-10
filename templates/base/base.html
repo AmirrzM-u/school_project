@@ -11,11 +11,27 @@
     <header>
         <nav>
             <div class="home-container">
-                <a href="">صفحه اصلی</a>
+                <a href="{% url 'home' %}">صفحه اصلی</a>
             </div>
-            <div class="signin-container">
-                <a href="{% url 'user_signin' %}">ورود</a>
-            </div>
+            {% if request.user.is_authenticated %}
+                <div class="logout_container">
+                    <a class="logout" href="{% url 'user_logout' %}">خروج</a>
+                </div>
+                <div class="profile_container">
+                    <a class="link_profile" href="{% url 'user_profile' %}">کارتابل</a>
+                </div>
+            {% else %}
+                <div class="signin-container">
+                    <div class="signin_dropdown">
+                    <button class="dropbtn">ورود</button>
+                    <div class="dropdown-content">
+                        <a href="{% url 'user_student_signin' 'student' %}">دانش آموز</a>
+                        <a href="{% url 'user_teacher_signin' 'teacher' %}">معلم</a>
+                        <a href="{% url 'user_parent_signin' 'parent' %}">والدین</a>
+                    </div>
+                    </div>
+                </div>
+            {% endif %}
              <div class="time-container">
                 امروز : {% time %}
             </div>

@@ -11,13 +11,22 @@
         <div class="login_form_container">
             <form class='login_form' method="post">
                 {% csrf_token %}
+                {% if form.non_field_errors %}
+                <div class="login_non_field_errors">
+                    <ul>
+                    {% for error in form.non_field_errors %}
+                        <li class="error">{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
                 {% for field in form %}
                     <div class="login_form_fields">
                         <label class="login_form_field_label" for="{{ field.id_for_label }}">{{ field.label }}</label>
                         {{ field }}
                     </div>
                     <div class="login_form_fileds_errors">
-                        {% if field.error %}
+                        {% if field.errors %}
                             <div class="login_form_fileds_errors_allert">
                                 {% for error in field.errors %}
                                     <p class="error">{{ error }}</p>
@@ -26,7 +35,7 @@
                         {% endif %}
                     </div>
                 {% endfor %}
-
+                <input type="submit" value="ورود">
             </form>
         </div>
     </div>
