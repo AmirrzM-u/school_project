@@ -1,0 +1,90 @@
+{% extends 'base/base.html' %}
+
+{% block title %} score {% endblock title %}
+
+{% block content %}
+<div  class="student_grade_10_container">
+    <h4 class="student_grade_10_scores_message">دروس پایه دهم</h4>
+    <table class="student_grade_10_table">
+        {% for term in grade_10 %}
+            <tr class="row_names_container">
+                <th class="row_name">درس</th>
+                <th class="row_name">نمره</th>
+                <th class="row_name">نام معلم</th>
+            </tr>
+            <tr class="grade_10_lessons_table">
+                <td class="grade_10_lessons">{{ term.term_lesson.title }}</td>
+            </tr>
+            <tr class="grade_10_grades_table">
+                <td class="grade_10_grades">{{ term.student_score }}</td>
+            </tr>
+            <tr class="teachers_table">
+                <td class="teachers"><a href="{% url 'teacher_panel_for_parents' %}">{{ term.term_teacher.user.last_name }}</a></td>
+            </tr>
+        {% empty %}
+            <h4 class="no_data_message">شما این پایه را نگذرانده اید</h4>
+        {% endfor %}
+    </table>
+    {% if student.avg_1 == 0 %}
+    {% else %}
+        <h4 class="avg1_container">معدل این ترم شما: {{ student.avg_1 }}</h4>
+    {% endif %}
+</div>
+<div  class="student_grade_11_container">
+    <h4 class="student_grade_11_scores_message">دروس پایه یازدهم</h4>
+    <table class="student_grade_11_table">
+        {% for term in grade_11 %}
+            <tr class="row_names_container">
+                <th class="row_name">درس</th>
+                <th class="row_name">نمره</th>
+                <th class="row_name">نام معلم</th>
+            </tr>
+            <tr class="grade_11_lessons_table">
+                <td class="grade_11_lessons">{{ term.term_lesson.title }}</td>
+            </tr>
+            <tr class="grade_11_grades_table">
+                <td class="grade_11_grades">{% if term.student_score == 0 %} <p>نمره ای ثبت نشد</p> {% else %}{{ term.student_score }} {% endif %}</td>
+            </tr>
+            <tr class="teachers_table">
+                <td class="teachers">{{ term.term_teacher.user.last_name }}</td>
+            </tr>
+        {% empty %}
+            <h4 class="no_data_message">شما این پایه را نگذرانده اید</h4>
+        {% endfor %}
+    </table>
+    {% if student.avg_2 == 0 %}
+    {% else %}
+        <h4 class="avg1_container">معدل این ترم شما: {{ student.avg_1 }}</h4>
+    {% endif %}
+</div>
+<div  class="student_grade_12_container">
+    <h4 class="student_grade_12_scores_message">دروس پایه دوازدهم</h4>
+    <table class="student_grade_12_table">
+        {% for term in grade_12 %}
+            <tr class="row_names_container">
+                <th class="row_name">درس</th>
+                <th class="row_name">نمره</th>
+                <th class="row_name">نام معلم</th>
+            </tr>
+            <tr class="grade_12_lessons_table">
+                <td class="grade_12_lessons">{{ term.term_lesson.title }}</td>
+            </tr>
+            <tr class="grade_12_grades_table">
+                <td class="grade_12_grades">{{ term.student_score }}</td>
+            </tr>
+            <tr class="teachers_table">
+                <td class="teachers">{{ term.term_teacher.user.last_name }}</td>
+            </tr>
+        {% empty %}
+            <h4 class="no_data_message">شما این پایه را نگذرانده اید</h4>
+        {% endfor %}
+    </table>
+    {% if student.avg_3 == 0 %}
+    {% else %}
+        <h4 class="avg3_container">معدل این ترم شما: {{ student.avg_1 }}</h4>
+    {% endif %}
+</div>
+{% endblock content %}
+
+
+

@@ -60,7 +60,7 @@ class ParentSigninForm(forms.Form):
             user = authenticate(username=username, password=password)
             if user is None:
                 raise forms.ValidationError('نام کاربری یا رمز عبور اشتباه است')
-            if user.children.id_student != student_id:
+            if user.parent_account.children.id_student != student_id:
                 raise forms.ValidationError('شناسه کاربری دانش آموز شما مطابقت ندارد')
             self.user = user
         return cd

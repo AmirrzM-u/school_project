@@ -1,0 +1,26 @@
+{% extends 'base/base.html' %}
+
+{% block title %} schedule {% endblock title %}
+
+{% block content %}
+    <div class="student_schedule_container">
+        <table class="student_schedule_table">
+            {% for term in student_term %} 
+                <tr class="student_schedule_row_names">
+                    <th class="student_schedule_row_name">درس</th>
+                    <th class="student_schedule_row_name">زمان برگزاری</th>
+                </tr>
+                <tr class="student_schedule_row_values">
+                    <td class="student_schedule_row_value">{{ term.term_lesson.title }}</td>
+                    <td class="student_schedule_row_value">{{ term.term_lesson.lesson_times }}</td>
+                </tr>
+            {% empty %}
+                <h4 class="lessons_empty_message">شما فعلا درسی برای نمایش ندارید</h4>
+            {% endfor %}
+            
+        </table>
+    </div>
+
+
+
+{% endblock content %}

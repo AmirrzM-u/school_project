@@ -4,6 +4,7 @@ from django_jalali.db import models as jmodels
 from django.utils import timezone
 from django.core.validators import RegexValidator, MaxValueValidator
 from django.db.models import Q, CheckConstraint, UniqueConstraint
+import jdatetime
 
 class Classroom(models.Model):
     class_number = models.CharField(max_length=3, verbose_name='شماره کلاس')
@@ -38,7 +39,7 @@ class User(AbstractUser):
         verbose_name_plural = 'کاربران'
     
     @property
-    def age(self):
+    def age_year(self):
         return self.date_of_birth.year
 
     def __str__(self):
@@ -58,10 +59,10 @@ class StudentAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_account', verbose_name='کاربر')
     id_student = models.PositiveIntegerField(default=0, unique=True, verbose_name='شناسه دانش آموز')
     entry = jmodels.jDateField(default=timezone.now, verbose_name='سال روردی دانش آموز')
-    avg_1 = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(20)], verbose_name='معدل سال اول')
-    avg_2 = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(20)], verbose_name='معدل سال دوم')
-    avg_3 = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(20)], verbose_name='معدل سال سوم')
-    student_parent = models.ForeignKey('ParentAccount', on_delete=models.PROTECT, related_name='children', null=True, blank=True, verbose_name='والد دانش آموز')
+    avg_1 = models.DecimalField(max_digits=4, decimal_places=2, default=0, validators=[MaxValueValidator(20)], verbose_name='معدل سال اول')
+    avg_2 = models.DecimalField(max_digits=4, decimal_places=2, default=0, validators=[MaxValueValidator(20)], verbose_name='معدل سال دوم')
+    avg_3 = models.DecimalField(max_digits=4, decimal_places=2, default=0, validators=[MaxValueValidator(20)], verbose_name='معدل سال سوم')
+    student_parent = models.OneToOneField('ParentAccount', on_delete=models.PROTECT, related_name='children', null=True, blank=True, verbose_name='والد دانش آموز')
     class GRADE_LEVELS(models.TextChoices):
         GRADE_10 = '10', 'Grade_10'
         GRADE_11 = '11', 'Grade_11'
@@ -82,8 +83,10 @@ class StudentAccount(models.Model):
 
     @property
     def entry_year(self):
-        entry_year = self.entry.year
-        return entry_year
+        if self.entry:
+            shamsi_date = jdatetime.date.fromgregorian(date=self.entry)
+            return shamsi_date.year
+        return None
 
     class Meta:
         ordering = ['entry'] 
@@ -120,7 +123,7 @@ class StudentTerm(models.Model):
     term_lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE, related_name='student_term', verbose_name='درس')
     term_teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='term_teacher', verbose_name='معلم این درس')
     term_student = models.ForeignKey(StudentAccount, on_delete=models.CASCADE, related_name='term_student', verbose_name='دانش آموز این درس')
-    student_score = models.PositiveSmallIntegerField(default=0, validators=[MaxValueValidator(20)], verbose_name='نمره دانش آموز')
+    student_score = models.DecimalField(max_digits=4, decimal_places=2, default=0, validators=[MaxValueValidator(20)], verbose_name='نمره دانش آموز')
     term_time = jmodels.jDateField(default=timezone.now, verbose_name='تاریخ')
     update = jmodels.jDateField(auto_now=True, verbose_name='اخرین بروزرسانی')
     objects = jmodels.jManager()

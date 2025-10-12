@@ -1,0 +1,31 @@
+{% extends 'base/base.html' %}
+
+{% block title %} profile {% endblock %}
+
+{% block content %}
+    {% if user.profile_pic %}
+        <img class="student_profile_picture" src="{{ user.profile_pic.url }}" alt="student_profile_picture" width="100px" height="100px">
+    {% else %}
+        <img class="student_default_profile_picture" src="/media/307ce493-b254-4b2d-8ba4-d12c080d6651.jpg" alt="default-profile" width="100px" height="100px">
+    {% endif %}
+    <h3 class="student_information">کارتابل دانش آموز: {{ user.last_name }}</h3>
+    <h4 class="student_information">شناسه دانش آموز: {{ user.student_account.id_student }}</h4>
+    <h4 class="student_information">تاریخ تولد: {{ user.date_of_birth }}</h4>
+    <h4 class="student_information">ورودی سال: {{ user.student_account.entry_year }}</h4>
+    <h4 class="student_information">پایه: {{ user.student_account.grade_level }}</h4>
+    
+    <ul class="student_option_list">
+        <li class="student_option">
+            <a class="link_student_option" href="{% url 'student_scores' %}">دروس سال تحصیلی جاری دانش آموز</a>
+        </li>
+
+        <li class="student_option">
+            <a class="link_student_option" href="{% url 'student_schedule' %}">برنامه کلاسی دانش آموز</a>
+        </li>
+        {% if user.user_type == 'prn' %}
+            <li class="parent_option">
+                <a class="link_parent_option" href="{% url 'teacher_panel_for_parents' %}">ارتباط با معلمین دانش آموز شما</a>
+            </li>
+        {% endif %}
+    </ul>
+{% endblock content %}
