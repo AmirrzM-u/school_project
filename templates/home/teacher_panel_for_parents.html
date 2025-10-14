@@ -1,0 +1,31 @@
+{% extends 'base/base.html' %}
+
+{% block title %} teacher-panel {% endblock title %}
+
+{% block content %}
+    <div class="children_name_container">
+        <h4 class="children_name">دروس دانش آموز: {{ student.user.first_name }} {{ student.user.last_name }}</h4>
+    </div>
+    <div class="teachers_panel_container">
+        <h4 class="message_for_parents">برای مشاهده پروفایل معلم مورد نظر به روی اسم معلم کلیک کنید</h4>
+        <table class="teachers_panel_table">
+            {% for term in terms %}
+                <tr class="teachers_panel_tr">
+                    <th class="teachers_panel_th">درس دانش آموز شما</th>
+                    <th class="teachers_panel_th">پایه درس</th>
+                    <th class="teachers_panel_th">معلم این درس</th>
+                    <th class="teachers_panel_th">نمره دانش آموز شما</th>
+                </tr>
+                <tr class="teachers_panel_tr">
+                    <td class="teachers_panel_td">{{ term.term_lesson.title }}</td>
+                    <td class="teachers_panel_td">{{ term.term_lesson.grade_level }}</td>
+                    <td class="teachers_panel_td"><a href="{% url 'teacher_profile_for_prn' term.term_teacher.id_teacher %}">{{ term.term_teacher.user.last_name }}</a></td>
+                    <td class="teachers_panel_td">{% if term.student_score == 0 %}نمره ای گزارش نشده{% else %}{{ term.student_score }}{% endif %}</td>
+                </tr>
+            {% empty %}
+                <h4 class="teacher_panel_empty_message">دانش آموز شما هنوز درسی نگذرانده است</h4>
+            {% endfor %}
+        </table>
+    </div>
+
+{% endblock content %}

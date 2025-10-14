@@ -88,9 +88,10 @@ class ParentPanelAdmin(admin.ModelAdmin):
 class TeacherPanelAdmin(admin.ModelAdmin):
     list_display = ['user__last_name']
     search_fields = ['user__first_name', 'user__last_name']
+    
     @admin.display(description='دانش آموزان', empty_value='بدون دانش آموز')
     def students_list(self, instance):
-      students = instance.students.all()
+      students = instance.students.filter(term_student__active_term=True)
       return str([student.user.last_name for student in students])
     readonly_fields = ['students_list']
 
@@ -137,10 +138,10 @@ class TermPanelAdmin(admin.ModelAdmin):
         term_year = instance.term_time.year
         return term_year
     
-    list_display = ['term_student', 'term_lesson', 'term_teacher', 'student_score', 'term_year']
+    list_display = ['term_student', 'term_lesson', 'term_teacher', 'student_score', 'term_year', 'active_term']
     autocomplete_fields = ['term_student']
-    ordering = ['term_time', 'term_lesson', 'term_teacher', 'student_score']
-    list_filter = ['term_lesson', 'term_teacher', ('term_time', JDateFieldListFilter)]
+    ordering = ['term_time', 'term_lesson', 'term_teacher', 'student_score', 'active_term']
+    list_filter = ['term_lesson', 'term_teacher', ('term_time', JDateFieldListFilter), 'active_term']
     search_fields = ['term_student__user__first_name', 'term_student__user__last_name', 'term_lesson__title', 'term_teacher__user__last_name']
 
 @admin.register(ManagerAccount)

@@ -33,7 +33,7 @@ class TeacherSigninForm(forms.Form):
         cd = super().clean()
         username = cd.get('username')
         password = cd.get('password')
-        teacher_id = cd.get('student_id')
+        teacher_id = cd.get('teacher_id')
 
         if (username and password and teacher_id):
             user = authenticate(username=username, password=password)
@@ -64,3 +64,13 @@ class ParentSigninForm(forms.Form):
                 raise forms.ValidationError('شناسه کاربری دانش آموز شما مطابقت ندارد')
             self.user = user
         return cd
+    
+class ParentTicketForm(forms.Form):
+    title = forms.CharField(max_length=100, required=True, label='موضوع پیام شما')
+    description = forms.CharField(max_length=1000, required=True,widget=forms.Textarea, label='موضوع پیام شما')
+
+class RecordScore(forms.Form):
+    score = forms.DecimalField(max_digits=4, decimal_places=2, max_value=20, min_value=1, label='نمره')
+
+class TicketResponse(forms.Form):
+    response = forms.CharField(max_length=1000, label='پاخ پیام')

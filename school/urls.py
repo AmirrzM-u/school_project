@@ -11,5 +11,11 @@ urlpatterns = [
     path('user_profile/', views.user_profile, name='user_profile'),
     path('student_scores/', views.student_scores, name='student_scores'),
     path('student_schedule/', views.student_schedule, name='student_schedule'),
-    path('teacher_panel_for_parents/', views.teacher_panel_for_parents, name='teacher_panel_for_parents')
+    path('teacher_panel_for_parents/', views.teacher_panel_for_parents, name='teacher_panel_for_parents'),
+    path('teacher_profile_for_parents/<int:teacher_id>/', views.teacher_profile_for_prn, name='teacher_profile_for_prn'),
+    path('parent_ticket/<int:teacher_id>', views.parent_ticket, name='parent_ticket'),
+    path('record_scores/', views.record_scores, name='record_scores'),
+    path('ticket_response/', views.ticket_response, name='ticket_response')
+
+
 ]

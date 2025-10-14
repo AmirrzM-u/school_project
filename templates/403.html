@@ -1,0 +1,11 @@
+{% extends "base/base.html" %}
+
+{% block title %}دسترسی غیرمجاز{% endblock title %}
+
+{% block content %}
+<div class="error-page">
+    <h2>دسترسی غیرمجاز</h2>
+    <p>{{ exception }}</p>
+    <a href="{% url 'home' %}" class="btn btn-primary">بازگشت به صفحه اصلی</a>
+</div>
+{% endblock content %}

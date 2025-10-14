@@ -1,0 +1,33 @@
+{% extends 'base/base.html' %}
+
+
+
+{% block title %} ticket {% endblock title %}
+
+
+{% block content %}
+    <div class="ticket_container">
+        <h3 id="ticket_announcment"> پیام </h3>
+        <div class="ticket_form_container">
+            <form class='ticket_form' method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="ticket_form_fields">
+                        <label class="ticket_form_field_label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                    <div class="ticket_form_fileds_errors">
+                        {% if field.errors %}
+                            <div class="ticket_form_fileds_errors_allert">
+                                {% for error in field.errors %}
+                                    <p class="error">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <input type="submit" value="ارسال">
+            </form>
+        </div>
+    </div>
+{% endblock content %}

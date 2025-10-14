@@ -1,0 +1,28 @@
+{% extends 'base/base.html' %}
+
+{% block title %} ticket-response {% endblock %}
+
+{% block content %}
+<div class="ticket_response_container">
+    {% for ticket in tickets %}
+        <h4 class="ticket_response_parent_name">نام والد: {{ ticket.parent.user.parent_account }} </h4>
+        <h4 class="ticket_response_title">موضوع: {{ ticket.title }}</h4>
+        <h4 class="ticket_response_description">متن پیام: {{ ticket.description }}</h4>
+        {% if ticket.status == 'true' %}
+        <h4 class="ticket_response_check">بررسی شده</h4>
+        <h4 class="ticket_response">پاسخ شما: {{ ticket.response }}</h4>
+        {% else %}
+        <h4 class="ticket_response_check">بررسی نشده </h4>
+        <h4 class="ticket_response_response">پاسخ: <form method="post" class="ticket_response_form">
+            {% csrf_token %}
+            <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+            {{ form }}
+            <button type="submit">ثبت پاسخ</button>
+        </form></h4>
+        {% endif %}
+    {% empty %}
+        <h4 class="students_terms_empty_message">پیامی برای شما ارسال نشده است</h4>
+    {% endfor %}
+</div>
+
+{% endblock content %}

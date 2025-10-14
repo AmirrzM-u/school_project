@@ -8,11 +8,11 @@
     {% else %}
         <img class="student_default_profile_picture" src="/media/307ce493-b254-4b2d-8ba4-d12c080d6651.jpg" alt="default-profile" width="100px" height="100px">
     {% endif %}
-    <h3 class="student_information">کارتابل دانش آموز: {{ user.last_name }}</h3>
-    <h4 class="student_information">شناسه دانش آموز: {{ user.student_account.id_student }}</h4>
-    <h4 class="student_information">تاریخ تولد: {{ user.date_of_birth }}</h4>
-    <h4 class="student_information">ورودی سال: {{ user.student_account.entry_year }}</h4>
-    <h4 class="student_information">پایه: {{ user.student_account.grade_level }}</h4>
+    <h3 class="student_information"> {% if user.user_type == 'prn' %}کارتابل دانش آموز شما: {{ student.user.first_name }} {{ student.user.last_name }} {% elif user.user_type == 'std' %}کارتابل دانش آموز: {{ user.first_name }} {{ user.last_name }} {% endif %}</h3>
+    <h4 class="student_information">شناسه دانش آموز: {{ student.id_student }}</h4>
+    <h4 class="student_information">تاریخ تولد: {{ student.user.date_of_birth }}</h4>
+    <h4 class="student_information">ورودی سال: {{ student.entry_year }}</h4>
+    <h4 class="student_information">پایه: {{ student.grade_level }}</h4>
     
     <ul class="student_option_list">
         <li class="student_option">

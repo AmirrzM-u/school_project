@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.core.validators import RegexValidator, MaxValueValidator
 from django.db.models import Q, CheckConstraint, UniqueConstraint
 import jdatetime
+from datetime import date
 
 class Classroom(models.Model):
     class_number = models.CharField(max_length=3, verbose_name='شماره کلاس')
@@ -39,8 +40,11 @@ class User(AbstractUser):
         verbose_name_plural = 'کاربران'
     
     @property
-    def age_year(self):
-        return self.date_of_birth.year
+    def age(self):
+        time = jdatetime.date.today().year
+        birth = self.date_of_birth.year
+        age = time - birth
+        return age
 
     def __str__(self):
         return f"{self.first_name}-{self.last_name}-{self.user_type}"
@@ -125,6 +129,7 @@ class StudentTerm(models.Model):
     term_student = models.ForeignKey(StudentAccount, on_delete=models.CASCADE, related_name='term_student', verbose_name='دانش آموز این درس')
     student_score = models.DecimalField(max_digits=4, decimal_places=2, default=0, validators=[MaxValueValidator(20)], verbose_name='نمره دانش آموز')
     term_time = jmodels.jDateField(default=timezone.now, verbose_name='تاریخ')
+    active_term = models.BooleanField(default=True, verbose_name='فعال بودن ترم')
     update = jmodels.jDateField(auto_now=True, verbose_name='اخرین بروزرسانی')
     objects = jmodels.jManager()
 

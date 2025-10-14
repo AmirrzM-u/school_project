@@ -53,14 +53,17 @@ def user_logout(request):
 
 @login_required
 def user_profile(request):
-    user = request.user
-    user_type = user.user_type
+    user_type = request.user.user_type
     if user_type == 'std':
+        user = request.user
         return render(request, 'home/student_profile.html', {'user':user})
     elif user_type == 'prn':
-        return render(request, 'home/student_profile.html', {'user':user})
-
-
+        user = request.user
+        student = user.parent_account.children
+        return render(request, 'home/student_profile.html', {'user':user, 'student':student})
+    elif user_type == 'tch':
+        user = request.user
+        return render(request, 'home/teacher_profile.html', {'user':user})
 
 @login_required    
 def student_scores(request):
@@ -134,7 +137,80 @@ def student_schedule(request):
 
 @login_required
 def teacher_panel_for_parents(request):
+    parent = request.user
+    if parent.user_type != 'prn':
+        raise PermissionDenied('شما به این صفحه دسترسی ندایرید')
     student = request.user.parent_account.children
-    term = student.term_student.all()
-    return render(request, 'home/teacher_panel_for_parents.html')
-  
+    terms = student.term_student.all()
+
+    context = {
+        'parent':parent,
+        'student':student,
+        'terms':terms,
+    }
+    return render(request, 'home/teacher_panel_for_parents.html', context)
+
+@login_required
+def teacher_profile_for_prn(request, teacher_id):
+    parent = request.user
+    if request.user.user_type != 'prn':
+        raise PermissionDenied('شما به این صفحه دسترسی ندایرید')
+    
+    teacher = TeacherAccount.objects.get(id_teacher=teacher_id)
+    tickets = Ticket.objects.filter(parent=request.user.parent_account, teacher=teacher)
+    context = {
+        'parent':parent,
+        'teacher':teacher,
+        'tickets':tickets,
+    }
+
+    return render(request, 'home/teacher_profile_for_prn.html', context)
+
+def parent_ticket(request, teacher_id):
+    if request.user.user_type != 'prn':
+        raise PermissionDenied('شما به این صفحه دسترسی ندایرید')
+    parent = request.user.parent_account
+    teacher = TeacherAccount.objects.get(id_teacher=teacher_id)
+    form = ParentTicketForm(request.POST or None)
+    if form.is_valid():
+        cd = form.cleaned_data
+        ticket = Ticket.objects.create(
+            parent = parent,
+            teacher = teacher,
+            title = cd['title'],
+            description = cd['description']
+        )
+        return redirect('teacher_profile_for_prn', teacher_id)
+    return render(request, 'home/parent_ticket.html', {'form':form})
+
+def record_scores(request):
+    if request.user.user_type != 'tch':
+        raise PermissionDenied('شما به این صفحه دسترسی ندایرید')
+    teacher = request.user.teacher_account
+    terms = StudentTerm.objects.filter(term_teacher=teacher, active_term=True)
+    form = RecordScore(request.POST or None)
+    if form.is_valid():
+        term_id = request.POST.get('term_id')
+        score = form.cleaned_data['score']
+        term = StudentTerm.objects.get(id=term_id)
+        term.student_score = score
+        term.save()
+        return redirect('record_scores', )
+    return render(request, 'home/record_scores.html', {'teacher':teacher, 'terms':terms, 'form':form})
+
+def ticket_response(request):
+    if request.user.user_type != 'tch':
+        raise PermissionDenied('شما به این صفحه دسترسی ندایرید')
+    teacher = request.user.teacher_account
+    tickets = Ticket.objects.filter(teacher=teacher)
+    form = TicketResponse(request.POST or None)
+    if form.is_valid():
+        ticket_id = request.POST.get('ticket_id')
+        response = form.cleaned_data['response']
+        ticket = Ticket.objects.get(id=ticket_id)
+        ticket.response = response
+        ticket.status = 'true'
+        ticket.save()
+        return redirect('ticket_response')
+
+    return render(request, 'home/ticket_response.html', {'tickets':tickets, 'form':form})

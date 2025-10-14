@@ -1,0 +1,23 @@
+{% extends 'base/base.html' %}
+
+{% block title %} record-scores {% endblock %}
+
+{% block content %}
+<div class="students_terms_container">
+    {% for term in terms %}
+        <h4 class="students_terms_name">نام دانش اموز: {{ term.term_student.user.first_name }} {{ term.term_student.user.last_name }}</h4>
+        <h4 class="students_terms_grade">پایه: {{ term.term_student.grade_level }}</h4>
+        <h4 class="students_terms_lesson">درس: {{ term.term_lesson.title }}</h4>
+        <h4 class="students_terms_time">زمان ترم: {{ term.term_time }}</h4>
+        <h4 class="students_terms_score">ثبت نمره: <form method="post" class="students_terms_score_form">
+            {% csrf_token %}
+            <input type="hidden" name="term_id" value="{{ term.id }}">
+            {{ form }}
+            <button type="submit">ثبت</button>
+        </form></h4>
+    {% empty %}
+        <h4 class="students_terms_empty_message">ترم فعالی ندارید</h4>
+    {% endfor %}
+</div>
+
+{% endblock content %}
