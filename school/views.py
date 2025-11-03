@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, ListView, DetailView
 from .models import *
 from .forms import *
@@ -23,8 +23,9 @@ def home(request):
     return render(request, "base/home.html", context)
 
 def news_detail(request, news_id):
-    news = SchoolNews.objects.get(id=news_id)
+    news = get_object_or_404(SchoolNews, id=news_id)
     return render(request, 'home/school_news.html', {'news':news})
+
 
 def user_signin(request, user_type):
     if user_type == 'student':
@@ -56,7 +57,8 @@ def user_profile(request):
     user_type = request.user.user_type
     if user_type == 'std':
         user = request.user
-        return render(request, 'home/student_profile.html', {'user':user})
+        student = user.student_account
+        return render(request, 'home/student_profile.html', {'user':user, 'student':student})
     elif user_type == 'prn':
         user = request.user
         student = user.parent_account.children
@@ -126,7 +128,11 @@ def student_scores(request):
 @login_required
 def student_schedule(request):
     try:
-        student = request.user.student_account
+        if request.user.user_type == 'std':
+            student = request.user.student_account
+        elif request.user.user_type == 'prn':
+            student = request.user.parent_account.children
+
     except StudentAccount.DoesNotExist:
         raise PermissionDenied('کاربر دانش آموز نمی باشد')
     

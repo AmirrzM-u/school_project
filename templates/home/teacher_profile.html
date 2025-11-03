@@ -3,14 +3,19 @@
 {% block title %} profile {% endblock %}
 
 {% block content %}
-    {% if user.profile_pic %}
-        <img class="teacher_profile_picture" src="{{ user.profile_pic.url }}" alt="teacher_profile_picture" width="100px" height="100px">
-    {% else %}
-        <img class="teacher_default_profile_picture" src="/media/307ce493-b254-4b2d-8ba4-d12c080d6651.jpg" alt="default-profile" width="100px" height="100px">
-    {% endif %}
-    <h3 class="teacher_information">نام: {{ user.last_name }}</h3>
-    <h4 class="teacher_information">شناسه شما: {{ user.teacher_account.id_teacher }}</h4>
-    <h4 class="teacher_information">تاریخ تولد: {{ user.date_of_birth }}</h4>
+    <div class="profile_page">
+    <div class="profile_row profile_vertical">
+        {% if user.profile_pic %}
+            <img class="teacher_profile_picture" src="{{ user.profile_pic.url }}" alt="teacher_profile_picture" width="100px" height="100px">
+        {% else %}
+            <img class="teacher_default_profile_picture" src="/media/307ce493-b254-4b2d-8ba4-d12c080d6651.jpg" alt="default-profile" width="100px" height="100px">
+        {% endif %}
+        <div class="profile_info">
+            <h3 class="teacher_information">نام: {{ user.last_name }}</h3>
+            <h4 class="teacher_information">شناسه شما: {{ user.teacher_account.id_teacher }}</h4>
+            <h4 class="teacher_information">تاریخ تولد: {{ user.date_of_birth }}</h4>
+        </div>
+    </div>
     
     <ul class="teacher_option_list">
         <li class="teacher_option">
@@ -20,4 +25,5 @@
             <a class="link_teacher_option" href="{% url 'ticket_response' %}">پاسخ به پیام والدین</a>
         </li>
     </ul>
+    </div>
 {% endblock content %}

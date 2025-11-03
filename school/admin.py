@@ -30,7 +30,17 @@ class ImageInline(admin.StackedInline):
 
 @admin.register(User)
 class UserPanelAdmin(UserAdmin):
-    list_display = ['last_name', 'first_name', 'email', 'user_type']
+    @admin.display(description='نام خوانوادگی')
+    def user_last_name(self, instance):
+        return instance.last_name
+    @admin.display(description='نام')
+    def user_first_name(self, instance):
+        return instance.first_name
+    @admin.display(description='ایمیل')
+    def user_email(self, instance):
+        return instance.email
+
+    list_display = ['user_last_name', 'user_first_name', 'user_email', 'user_type']
     search_fields = ['last_name', 'first_name', 'email', 'user_type']
     list_filter = ['user_type']
     ordering = ['user_type']
@@ -99,19 +109,20 @@ class TeacherPanelAdmin(admin.ModelAdmin):
 class StudentPanelAdmin(admin.ModelAdmin):
     @admin.display(description='سال ورودی')
     def entry_year(self, instance):
-        year = instance.entry.year
+        year = instance.entry_year
         return year
+    @admin.display(description='نام خوانوادگی')
+    def user_last_name(self, instance):
+        user_last_name = instance.user.last_name
+        return user_last_name
     
-    list_display = ['user__last_name', 'grade_level', 'entry_year', 'current_student', 'graduated']
+    list_display = ['user_last_name', 'grade_level', 'entry_year', 'current_student', 'graduated']
     ordering = ['current_student', '-graduated', 'entry', 'grade_level', 'student_class']
     list_filter = [('entry', JDateFieldListFilter), 'student_class', 'grade_level']
-    search_fields = ['user__first_name', 'user__last_name', 'grade_level']
-
-    
-
+    search_fields = ['user__first_name', 'user_last_name', 'grade_level']
 
 @admin.register(Classroom)
-class ClassroomPanleAdmin(admin.ModelAdmin):
+class ClassroomPanelAdmin(admin.ModelAdmin):
     list_display = ['class_number', 'students_number']
     readonly_fields = ['class_students']
 
@@ -154,6 +165,6 @@ class SchoolNewsPanelAdmin(admin.ModelAdmin):
     inlines = [ImageInline]
 
 @admin.register(Ticket)
-class TicketPAnelAdmin(admin.ModelAdmin):
+class TicketPanelAdmin(admin.ModelAdmin):
     list_display = ['title', 'status']
     list_editable = ['status']

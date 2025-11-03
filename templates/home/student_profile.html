@@ -3,16 +3,21 @@
 {% block title %} profile {% endblock %}
 
 {% block content %}
-    {% if user.profile_pic %}
-        <img class="student_profile_picture" src="{{ user.profile_pic.url }}" alt="student_profile_picture" width="100px" height="100px">
-    {% else %}
-        <img class="student_default_profile_picture" src="/media/307ce493-b254-4b2d-8ba4-d12c080d6651.jpg" alt="default-profile" width="100px" height="100px">
-    {% endif %}
-    <h3 class="student_information"> {% if user.user_type == 'prn' %}کارتابل دانش آموز شما: {{ student.user.first_name }} {{ student.user.last_name }} {% elif user.user_type == 'std' %}کارتابل دانش آموز: {{ user.first_name }} {{ user.last_name }} {% endif %}</h3>
-    <h4 class="student_information">شناسه دانش آموز: {{ student.id_student }}</h4>
-    <h4 class="student_information">تاریخ تولد: {{ student.user.date_of_birth }}</h4>
-    <h4 class="student_information">ورودی سال: {{ student.entry_year }}</h4>
-    <h4 class="student_information">پایه: {{ student.grade_level }}</h4>
+    <div class="profile_page">
+    <div class="profile_row profile_vertical">
+        {% if user.profile_pic %}
+            <img class="student_profile_picture" src="{{ user.profile_pic.url }}" alt="student_profile_picture" width="100px" height="100px">
+        {% else %}
+            <img class="student_default_profile_picture" src="/media/307ce493-b254-4b2d-8ba4-d12c080d6651.jpg" alt="default-profile" width="100px" height="100px">
+        {% endif %}
+        <div class="profile_info">
+            <h3 class="student_information"> {% if user.user_type == 'prn' %}کارتابل دانش آموز شما: {{ student.user.first_name }} {{ student.user.last_name }} {% elif user.user_type == 'std' %}کارتابل دانش آموز: {{ user.first_name }} {{ user.last_name }} {% endif %}</h3>
+            <h4 class="student_information">شناسه دانش آموز: {{ student.id_student }}</h4>
+            <h4 class="student_information">تاریخ تولد: {{ student.user.date_of_birth }}</h4>
+            <h4 class="student_information">ورودی سال: {{ student.entry_year }}</h4>
+            <h4 class="student_information">پایه: {{ student.grade_level }}</h4>
+        </div>
+    </div>
     
     <ul class="student_option_list">
         <li class="student_option">
@@ -28,4 +33,5 @@
             </li>
         {% endif %}
     </ul>
+    </div>
 {% endblock content %}

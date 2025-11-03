@@ -1,42 +1,42 @@
 {% extends 'base/base.html' %}
+{% load tags %}
+
 
 {% block title %} Home {% endblock %}
 
 {% block content %}
     <h2 class="welcom_container">به وبسایت دبیرستان خوش آمدید</h2>
 
-    <div class="school_news_container">
-        {% for news in school_news.all %}
-            <div class="news_title_container">
-                <a class="link_news_title_container" href="{% url 'news_details' news.id %}"><h4 class="news_title">{{ news.title }}</h4></a>
+    <div class="news_and_stats container">
+        <div class="news_column">
+            <div class="school_news_container">
+                {% for news in school_news.all %}
+                    <div class="news_title_container">
+                        <a class="link_news_title_container" href="{% url 'news_details' news.id %}"><h4 class="news_title">{{ news.title }}</h4></a>
+                    </div>
+                    <div class="news_image_container">
+                        <a class="link_image_container" href="{% url 'news_details' news.id %}"><img class="news_image" src="{{ news.title_image.url }}" alt="{{ news.title }}"></a>
+                    </div>
+                {% endfor %}
             </div>
-            <div class="news_image_container">
-                <a class="link_image_container" href="{% url 'news_details' news.id %}"><img class="news_image" src="{{ news.title_image.url }}" alt="{{ news.title }}"></a>
+        </div>
+
+        <aside class="stats_column">
+            <div class="stat student_number_container card">
+                <p class="stat_label">تعداد دانش آموزان</p>
+                <p class="stat_value">{{ student_number }}</p>
             </div>
-        {% endfor %}
+
+            <div class="stat class_number_container card">
+                <p class="stat_label">تعداد کلاس ها</p>
+                <p class="stat_value">{{ class_number }}</p>
+            </div>
+
+            <div class="stat teacher_number_container card">
+                <p class="stat_label">تعداد معلمین</p>
+                <p class="stat_value">{{ teachers_number }}</p>
+            </div>
+        </aside>
     </div>
-    <div class="student_number_container">
-        <div class="student_number_image_container">
-            <img src="" alt="">
-        </div>
-        <div class="student_number">
-            {{ student_number }}
-        </div>
-    </div>
-        <div class="class_number_container">
-        <div class="class_number_image_container">
-            <img src="" alt="">
-        </div>
-        <div class="class_number">
-            {{ class_number }}
-        </div>
-    </div>
-        <div class="teacher_number_container">
-        <div class="teacher_number_image_container">
-            <img src="" alt="">
-        </div>
-        <div class="teacher_number">
-            {{ teachers_number }}
-        </div>
-    </div>
+
 {% endblock content %}

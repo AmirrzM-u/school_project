@@ -4,16 +4,22 @@
 
 {% block content %}
 
-    {% if teacher.user.profile_pic %}
-        <img class="teacher_profile_picture" src="{{ teacher.user.profile_pic.url }}" alt="teacher_profile_picture" width="100px" height="100px">
-    {% else %}
-        <img class="teacher_default_profile_picture" src="/media/307ce493-b254-4b2d-8ba4-d12c080d6651.jpg" alt="default-profile" width="100px" height="100px">
-    {% endif %}
+    <div class="profile_page">
+    <div class="profile_row profile_vertical">
+        {% if user.profile_pic %}
+            <img class="teacher_profile_picture" src="{{ user.profile_pic.url }}" alt="teacher_profile_picture" width="100px" height="100px">
+        {% else %}
+            <img class="teacher_default_profile_picture" src="/media/307ce493-b254-4b2d-8ba4-d12c080d6651.jpg" alt="default-profile" width="100px" height="100px">
+        {% endif %}
+        <div class="profile_info">
+            <h3 class="teacher_information">پروفایل اقای: {{ teacher.user.last_name }}</h3>
+            <h4 class="teacher_information">شناسه معلم: {{ teacher.id_teacher }}</h4>
+            <h4 class="teacher_information">سن : {{ teacher.user.age }}</h4>
+            <h4 class="teacher_information">اطلاعات: {{ teacher.extra_detail }}</h4>
+        </div>
+    </div>
 
-    <h3 class="teacher_information">پروفایل اقای: {{ teacher.user.last_name }}</h3>
-    <h4 class="teacher_information">شناسه معلم: {{ teacher.id_teacher }}</h4>
-    <h4 class="teacher_information">سن : {{ teacher.user.age }}</h4>
-    <h4 class="teacher_information">اطلاعات: {{ teacher.extra_detail }}</h4>
+
     <div class="parent_ticket_container">
     {% if tickets %}
         {% for ticket in tickets %}

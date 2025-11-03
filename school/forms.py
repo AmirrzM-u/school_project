@@ -3,7 +3,7 @@ from .models import *
 from django.contrib.auth import authenticate
 
 class StudentSigninForm(forms.Form):
-    username = forms.CharField(max_length=100, required=True, label='نام کاربری یا شماره تلفن همراه')
+    username = forms.CharField(max_length=100, required=True, label='نام کاربری')
     password = forms.CharField(max_length=100, required=True, widget=forms.PasswordInput, label='رمز عبور')
     student_id = forms.IntegerField(required=True, label='شناسه دانش آموز')
 
@@ -24,7 +24,7 @@ class StudentSigninForm(forms.Form):
         return cd
     
 class TeacherSigninForm(forms.Form):
-    username = forms.CharField(max_length=100, required=True, label='نام کاربری یا شماره تلفن همراه')
+    username = forms.CharField(max_length=100, required=True, label='نام کاربری')
     password = forms.CharField(max_length=100, required=True, widget=forms.PasswordInput, label='رمز عبور')
     teacher_id = forms.IntegerField(required=True, label='شناسه معلم')
 
@@ -45,7 +45,7 @@ class TeacherSigninForm(forms.Form):
         return cd
     
 class ParentSigninForm(forms.Form):
-    username = forms.CharField(max_length=100, required=True, label='نام کاربری یا شماره تلفن همراه')
+    username = forms.CharField(max_length=100, required=True, label='نام کاربری')
     password = forms.CharField(max_length=100, required=True, widget=forms.PasswordInput, label='رمز عبور')
     student_id = forms.IntegerField(required=True, label='شناسه دانش آموز شما')
 

@@ -31,10 +31,10 @@ class User(AbstractUser):
     profile_pic = models.ImageField(upload_to=profile_img_upload_to, blank=True, null=True, verbose_name='عکس پروفایل')
     date_of_birth = jmodels.jDateField(null=True, blank=True, verbose_name='تاریخ تولد')
     class UserTypes(models.TextChoices):
-        MANAGER = 'mng', 'manager'
-        TEACHER = 'tch', 'teacher'
-        STUDENT = 'std', 'student'
-        PARENT = 'prn', 'parent'
+        MANAGER = 'mng', 'مدیر'
+        TEACHER = 'tch', 'معلم'
+        STUDENT = 'std', 'دانش آموز'
+        PARENT = 'prn', 'والد'
     user_type = models.CharField(max_length=3, choices=UserTypes, verbose_name='نوع کاربر')
     class Meta:
         verbose_name_plural = 'کاربران'
@@ -42,7 +42,10 @@ class User(AbstractUser):
     @property
     def age(self):
         time = jdatetime.date.today().year
-        birth = self.date_of_birth.year
+        if self.date_of_birth:
+            birth = self.date_of_birth.year
+        else:
+            return None
         age = time - birth
         return age
 
@@ -131,11 +134,12 @@ class StudentTerm(models.Model):
     term_time = jmodels.jDateField(default=timezone.now, verbose_name='تاریخ')
     active_term = models.BooleanField(default=True, verbose_name='فعال بودن ترم')
     update = jmodels.jDateField(auto_now=True, verbose_name='اخرین بروزرسانی')
+    
     objects = jmodels.jManager()
 
     @property
     def term_year(self):
-        year = self.term_time.year
+        year = jdatetime.date.fromgregorian(date=self.term_time).year
         return year
 
     class Meta:
@@ -207,7 +211,7 @@ class Ticket(models.Model):
         CHECKED = 'true', 'Checked'
         NOT_CHECKED = 'false', "Not checked"
     status = models.CharField(max_length=5, choices=Status, default=Status.NOT_CHECKED, verbose_name='وضعیت')
-    response = models.CharField(max_length=1000, verbose_name='پاسخ معلم')
+    response = models.CharField(max_length=1000, verbose_name='پاسخ معلم', blank=True, null=True)
     
     class Meta:
         ordering = ['status']

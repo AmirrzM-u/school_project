@@ -1,3 +1,4 @@
+{% load static %}
 {% load tags %}
 
 <!DOCTYPE html>
@@ -5,6 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'base.css' %}">
     <title>school - {% block title %} {% endblock title %}</title>
 </head>
 <body>
@@ -43,7 +45,9 @@
         {% endblock content %}
     </main>
     <footer>
-        <p>کلیه حقوق این وبسایت متعلق به این دبیرستان میباشد</p>
+        <p class="warning">کلیه حقوق این وبسایت متعلق به این دبیرستان میباشد</p>
+        <p class="contact information">0284783215 :شماره تماس</p>
+        <p class="contact information">dabirestan@gmail.com  :ایمیل</p>
     </footer>
     
 </body>

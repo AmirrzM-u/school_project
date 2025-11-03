@@ -1,0 +1,143 @@
+/* New stylesheet inspired by https://www.upperschool.ir/ */
+
+:root{
+	--page-bg: rgba(250,250,252,0.85);
+	--card-bg: rgba(255,255,255,0.95);
+	--muted: #6b7280;
+	--text: #0b1220;
+	--brand: #1652f0;
+	--accent: #06b6d4;
+	--danger: #ef4444;
+	--radius: 12px;
+	--container: 1200px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+	display:flex;
+	flex-direction:column;
+	min-height:100vh;
+	margin:0;
+	font-family: 'Segoe UI', Roboto, Inter, system-ui, -apple-system, 'Helvetica Neue', Arial;
+	color:var(--text);
+	background-color:var(--page-bg);
+	-webkit-font-smoothing:antialiased;
+	-moz-osx-font-smoothing:grayscale;
+	background-image:url('/media/background.jpg');
+	background-size:cover;
+	background-position:center center;
+	background-repeat:no-repeat;
+	background-attachment:fixed;
+}
+
+.container{max-width:var(--container);margin:0 auto;padding:1rem}
+
+/* make main expand so footer stays at bottom */
+main{flex:1;display:block}
+
+header{background:linear-gradient(90deg,var(--brand),var(--accent));color:#fff}
+nav{display:flex;gap:1rem;align-items:center;padding:0.9rem 1rem}
+.home-container a{color:#fff;text-decoration:none;font-weight:700}
+.logout_container a,.profile_container a{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,0.12);padding:0.35rem 0.6rem;border-radius:8px}
+
+.time-container{margin-left:auto;color:#fff;font-weight:700}
+
+.signin_dropdown{position:relative}
+.dropbtn{background:transparent;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:0.45rem 0.6rem;border-radius:8px;cursor:pointer}
+.dropdown-content{display:none;position:absolute;right:0;top:calc(100%);background:var(--card-bg);color:var(--text);min-width:220px;border-radius:10px;padding:0.25rem;box-shadow:0 12px 30px rgba(2,6,23,0.12);direction:rtl;text-align:right}
+.signin_dropdown:hover .dropdown-content{display:block}
+.dropdown-content a{display:block;padding:0.6rem 0.9rem;color:var(--text);text-decoration:none;border-radius:6px}
+.dropdown-content a:hover{background:#f3f6fb}
+
+.welcom_container{text-align:center;color:#fff;font-size:1.4rem;margin:0 0 1rem 0;text-shadow:0 3px 10px rgba(11,18,32,0.6)}
+
+.school_news_container{display:block;gap:1rem;padding:1rem 0}
+.news_title_container{width:100%;max-width:920px;text-align:right}
+.link_news_title_container{text-decoration:none;color:var(--text);display:block}
+.news_title{margin:0;padding:0.7rem 0;font-size:1.15rem;background:linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.45));border-radius:10px}
+.news_image_container{width:100%;max-width:920px;text-align:right}
+.news_image{width:100%;height:auto;border-radius:10px;object-fit:cover;box-shadow:0 18px 40px rgba(2,6,23,0.12)}
+
+/* two-column layout for home: news (left) + stats (right) */
+.news_and_stats{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start;max-width:var(--container);margin:18px auto;padding:0 1rem}
+.stats_column{display:flex;flex-direction:column;gap:16px;align-items:stretch}
+.card{background:var(--card-bg);border-radius:var(--radius);padding:1rem;box-shadow:0 10px 30px rgba(2,6,23,0.06);backdrop-filter: blur(6px)}
+.stat{text-align:center}
+.stat_label{font-size:14px;color:var(--muted);margin-bottom:8px}
+.stat_value{font-size:28px;font-weight:700;color:var(--brand)}
+
+/* news detail */
+.detail_news_container{display:flex;flex-direction:column;align-items:flex-end;gap:1rem;padding:2rem}
+.detail_news_title_container{width:100%;max-width:920px;text-align:right}
+.detail_news_image_container{width:100%;max-width:760px;text-align:right}
+.detail_news_decription_container{width:100%;max-width:920px;text-align:right}
+.detail_news_description{line-height:1.8;color:var(--text)}
+.detail_news_description_image{max-width:100%;border-radius:8px;margin-top:0.6rem}
+
+/* card */
+.card{background:var(--card-bg);border-radius:var(--radius);padding:1rem;box-shadow:0 10px 30px rgba(2,6,23,0.06);backdrop-filter: blur(6px)}
+
+/* forms */
+.ticket_container,.login_container{max-width:920px;margin:0 auto}
+.ticket_form,.login_form{display:flex;flex-direction:column;gap:0.75rem}
+.ticket_form_fields label,.login_form_fields label{display:block;margin-bottom:0.25rem;color:var(--muted);font-weight:700}
+input[type="text"],input[type="email"],input[type="password"],input[type="number"],textarea,select{width:100%;padding:0.8rem;border-radius:10px;border:1px solid rgba(11,18,32,0.06);background:rgba(255,255,255,0.95)}
+input[type="submit"],button{background:var(--brand);color:#fff;padding:0.7rem 1rem;border-radius:10px;border:none;cursor:pointer}
+.error{color:var(--danger);font-size:0.95rem}
+
+.students_terms_score_form{display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center}
+
+/* tables */
+.student_schedule_table,.student_grade_10_table,.student_grade_11_table,.student_grade_12_table,.teachers_panel_table{width:100%;border-collapse:collapse;background:var(--card-bg);border-radius:12px;overflow:hidden}
+thead th{background:linear-gradient(90deg, rgba(22,82,240,0.06), rgba(6,182,212,0.03));padding:0.85rem;text-align:left;font-weight:700}
+tbody td{padding:0.75rem;border-top:1px solid rgba(11,18,32,0.04)}
+
+/* profile */
+.student_profile_picture,.teacher_profile_picture{width:120px;height:120px;border-radius:999px;object-fit:cover;border:4px solid rgba(255,255,255,0.6)}
+.student_option_list,.teacher_option_list{list-style:none;padding:0;margin:1rem 0;display:flex;flex-direction:column;gap:0.6rem;align-items:center}
+.student_option a,.teacher_option a{padding:0.6rem 0.9rem;border-radius:10px;background:rgba(255,255,255,0.6);text-decoration:none;color:var(--brand);font-weight:700;text-align:center;min-width:200px}
+
+/* Profile layout: make info right-sided and place text to the right of avatar */
+.profile_row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;direction:rtl}
+.profile_row img{flex:0 0 auto}
+.profile_info{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+.student_information,.teacher_information{margin:0;padding:0.25rem 0;color:var(--text);text-align:center}
+.student_default_profile_picture,.teacher_default_profile_picture{width:120px;height:120px;border-radius:999px;object-fit:cover;border:4px solid rgba(255,255,255,0.6)}
+.parent_ticket_container{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+
+/* Center the profile page content vertically and horizontally */
+/* profile page: stack content vertically so options are always below info */
+.profile_page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 160px);padding:1.5rem;gap:18px}
+.profile_page .profile_row{max-width:760px;width:100%}
+
+/* vertical profile variant: avatar on top, info below */
+.profile_vertical{flex-direction:column;align-items:center;text-align:center}
+.profile_vertical .profile_info{align-items:center}
+.profile_vertical .student_profile_picture,.profile_vertical .teacher_profile_picture{margin-bottom:12px}
+
+/* ensure option lists sit below profile content and are centered */
+.profile_page .student_option_list,.profile_page .teacher_option_list{margin-top:8px;display:flex;flex-direction:column;align-items:center;width:100%;max-width:420px}
+.profile_page .student_option_list .student_option,.profile_page .teacher_option_list .teacher_option{width:100%;display:flex;justify-content:center}
+
+/* footer */
+footer{padding:1rem;text-align:right;background:rgba(7,18,51,0.9);color:#fff;margin-top:2rem}
+.warning{margin:0;font-weight:600}
+.contact{margin:0.2rem 0}
+
+/* accessibility */
+a:focus,button:focus,input:focus,select:focus,textarea:focus{outline:3px solid rgba(22,82,240,0.12);outline-offset:2px}
+
+/* responsive */
+@media (max-width:1000px){
+	.news_title{font-size:1.05rem}
+	.container{padding:0.75rem}
+}
+@media (max-width:720px){
+	nav{flex-wrap:wrap;align-items:center}
+	.time-container{margin-left:0;order:99;width:100%;text-align:right;padding-top:0.4rem}
+	.news_image{max-height:320px}
+	.student_profile_picture,.teacher_profile_picture{width:100px;height:100px}
+}
+
+/* end */
