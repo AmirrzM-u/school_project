@@ -26,26 +26,20 @@ def news_detail(request, news_id):
     news = get_object_or_404(SchoolNews, id=news_id)
     return render(request, 'home/school_news.html', {'news':news})
 
+FORM_MAP = {
+    'student':StudentSigninForm,
+    'teacher':TeacherSigninForm,
+    'parent':ParentSigninForm,
+}
 
 def user_signin(request, user_type):
-    if user_type == 'student':
-        form = StudentSigninForm(request.POST or None)
+    form_class = FORM_MAP.get(user_type)
+    if form_class:
+        form = form_class(request.POST or None)
         if form.is_valid():
             login(request, form.user)
             return redirect('home')
-        return render(request, 'registration/login.html', {'form':form})
-    elif user_type == 'teacher':
-        form = TeacherSigninForm(request.POST or None)
-        if form.is_valid():
-            login(request, form.user)
-            return redirect('home')
-        return render(request, 'registration/login.html', {'form':form})
-    elif user_type == 'parent':
-        form = ParentSigninForm(request.POST or None)
-        if form.is_valid():
-            login(request, form.user)
-            return redirect('home')
-        return render(request, 'registration/login.html', {'form':form})        
+    return render(request, 'registration/login.html', {'form':form})       
 
 @login_required
 def user_logout(request):
