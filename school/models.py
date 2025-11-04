@@ -94,7 +94,7 @@ class StudentAccount(models.Model):
             shamsi_date = jdatetime.date.fromgregorian(date=self.entry)
             return shamsi_date.year
         return None
-
+    
     class Meta:
         ordering = ['entry'] 
         indexes = [

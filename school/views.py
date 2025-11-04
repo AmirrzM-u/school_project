@@ -5,6 +5,7 @@ from .forms import *
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseForbidden
 
 
 def home(request):
@@ -49,17 +50,17 @@ def user_logout(request):
 @login_required
 def user_profile(request):
     user_type = request.user.user_type
+    user = request.user
     if user_type == 'std':
-        user = request.user
         student = user.student_account
         return render(request, 'home/student_profile.html', {'user':user, 'student':student})
     elif user_type == 'prn':
-        user = request.user
         student = user.parent_account.children
         return render(request, 'home/student_profile.html', {'user':user, 'student':student})
     elif user_type == 'tch':
-        user = request.user
         return render(request, 'home/teacher_profile.html', {'user':user})
+    else:
+        return HttpResponseForbidden('شما مجاز به دسترسی به این صفحه نیستید.')
 
 @login_required    
 def student_scores(request):
@@ -69,6 +70,7 @@ def student_scores(request):
         except StudentAccount.DoesNotExist:
             raise PermissionDenied('کاربر دانش آموز نمی باشد')
         student_term = student.term_student
+        print(f'this is what you wanted: {[student.avg()]}')
 
     if request.user.user_type == 'prn':
         try:
@@ -77,47 +79,7 @@ def student_scores(request):
             raise PermissionDenied('کاربر دانش آموز نمی باشد')
         student_term = student.term_student
 
-    grade_10 = student_term.filter(term_lesson__grade_level = '10')
-    scores_1 = [term.student_score for term in grade_10]
-    avg_1 = sum(scores_1) / len(scores_1) if scores_1 else 0
-
-    grade_11 = student_term.filter(term_lesson__grade_level = '11')
-    scores_2 = [term.student_score for term in grade_11]
-    avg_2 = sum(scores_2) / len(scores_2) if scores_2 else 0
-    
-    grade_12 = student_term.filter(term_lesson__grade_level = '12')
-    scores_3 = [term.student_score for term in grade_12]
-    avg_3 = sum(scores_3) / len(scores_3) if scores_3 else 0
-
-    student.avg_1 = avg_1
-    student.avg_2 = avg_2
-    student.avg_3 = avg_3
-    
-    student.save(update_fields=['avg_1', 'avg_2', 'avg_3'])
-
-    if student.grade_level == '10':
-        context = {
-            'student': student,
-            'student_term':student_term,
-            'grade_10':grade_10,
-        }
-    elif student.grade_level == '11':
-        context = {
-            'student': student,
-            'student_term':student_term,
-            'grade_10':grade_10,
-            'grade_11':grade_11
-        }
-    elif student.grade_level == '12':
-        context = {
-            'student': student,
-            'student_term':student_term,
-            'grade_10':grade_10,
-            'grade_11':grade_11,
-            'grade_12':grade_12
-        }
-
-    return render(request, 'home/student_scores.html', context)
+    return render(request, 'home/student_scores.html',)
 
 @login_required
 def student_schedule(request):
@@ -126,7 +88,6 @@ def student_schedule(request):
             student = request.user.student_account
         elif request.user.user_type == 'prn':
             student = request.user.parent_account.children
-
     except StudentAccount.DoesNotExist:
         raise PermissionDenied('کاربر دانش آموز نمی باشد')
     

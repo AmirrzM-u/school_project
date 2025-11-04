@@ -1,4 +1,4 @@
-from .models import *
+from .models import StudentAccount, StudentTerm
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
@@ -6,3 +6,11 @@ from django.db.models.signals import post_save
 def deactivate_term(sender, instance, **kwargs):
     if instance.student_score and instance.active_term:
         StudentTerm.objects.filter(id=instance.id).update(active_term=False)
+
+@receiver(post_save, sender=StudentTerm)
+def updating_avg(sender, instance, **kwargs):
+    if instance.student_score:
+        lesson_grade = instance.term_lesson.grade_level
+        student = instance.term_student
+        lessons = student.term_student.filter(term_lesson__grade_level=lesson_grade)
+        
