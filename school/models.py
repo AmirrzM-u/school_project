@@ -6,6 +6,7 @@ from django.core.validators import RegexValidator, MaxValueValidator
 from django.db.models import Q, CheckConstraint, UniqueConstraint
 import jdatetime
 from datetime import date
+from django.db.models import Avg
 
 class Classroom(models.Model):
     class_number = models.CharField(max_length=3, verbose_name='شماره کلاس')
@@ -81,6 +82,24 @@ class StudentAccount(models.Model):
     student_term = models.ManyToManyField('TeacherAccount', through='StudentTerm', related_name='students',  through_fields=('term_student', 'term_teacher'), blank=True, verbose_name='درس های دانش آموز')
     extra_detail = models.CharField(max_length=500, verbose_name='اطلاعات اضافه', blank=True, null=True)
     
+    @property
+    def entry_year(self):
+        if self.entry:
+            shamsi_date = jdatetime.date.fromgregorian(date=self.entry)
+            return shamsi_date.year
+        return None
+    
+    def avg_update(self, grade):
+        avg_data = self.term_student.filter(term_lesson__grade_level=grade).exclude(student_score=0).aggregate(avg=Avg('student_score'))
+        grade_avg_map = {
+            '10':'avg_1',
+            '11':'avg_2',
+            '12':'avg_3',
+        }
+        avg_field = grade_avg_map.get(str(grade))
+        setattr(self, avg_field, avg_data['avg'])
+        self.save(update_fields=[avg_field])
+    
     class ActiveStudentManager(models.Manager):
         def get_queryset(self):
             return super().get_queryset().filter(current_student=True, graduated=False)
@@ -88,12 +107,6 @@ class StudentAccount(models.Model):
     objects = jmodels.jManager()
     active = ActiveStudentManager()
 
-    @property
-    def entry_year(self):
-        if self.entry:
-            shamsi_date = jdatetime.date.fromgregorian(date=self.entry)
-            return shamsi_date.year
-        return None
     
     class Meta:
         ordering = ['entry'] 

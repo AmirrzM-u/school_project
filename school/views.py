@@ -63,23 +63,30 @@ def user_profile(request):
         return HttpResponseForbidden('شما مجاز به دسترسی به این صفحه نیستید.')
 
 @login_required    
-def student_scores(request):
+def student_scores(request, grade=None):
     if request.user.user_type == 'std':
         try:
             student = request.user.student_account
         except StudentAccount.DoesNotExist:
-            raise PermissionDenied('کاربر دانش آموز نمی باشد')
-        student_term = student.term_student
-        print(f'this is what you wanted: {[student.avg()]}')
-
-    if request.user.user_type == 'prn':
+            raise PermissionDenied('کاربر مجاز نمی باشد')
+    elif request.user.user_type == 'prn':
         try:
             student = request.user.parent_account.children
         except StudentAccount.DoesNotExist:
             raise PermissionDenied('کاربر دانش آموز نمی باشد')
-        student_term = student.term_student
-
-    return render(request, 'home/student_scores.html',)
+    avg_map = {
+        '10':student.avg_1,
+        '11':student.avg_2,
+        '12':student.avg_3,
+    }
+    grade_map = {
+        '10':'دهم',
+        '11':'یازدهم',
+        '12':'دوازدهم',
+    }
+    if grade:
+        terms = student.term_student.filter(term_lesson__grade_level=grade)
+    return render(request, 'home/student_scores.html', {"terms":terms, "grade":grade_map[grade], "avg":avg_map[grade], "student_grade":student.grade_level})
 
 @login_required
 def student_schedule(request):
