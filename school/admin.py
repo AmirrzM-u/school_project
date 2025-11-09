@@ -30,7 +30,7 @@ class ImageInline(admin.StackedInline):
 
 @admin.register(User)
 class UserPanelAdmin(UserAdmin):
-    @admin.display(description='نام خوانوادگی')
+    @admin.display(description='نام خانوادگی')
     def user_last_name(self, instance):
         return instance.last_name
     @admin.display(description='نام')

@@ -7,6 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseForbidden
 
+def getting_studentaccount_from_user(user):
+    if user.user_type == 'std':
+        return user.student_account
+    elif user.user_type == 'prn':
+        return user.parent_account.children
+
 
 def home(request):
     school_news = SchoolNews.objects.all()
@@ -51,29 +57,22 @@ def user_logout(request):
 def user_profile(request):
     user_type = request.user.user_type
     user = request.user
-    if user_type == 'std':
-        student = user.student_account
-        return render(request, 'home/student_profile.html', {'user':user, 'student':student})
-    elif user_type == 'prn':
-        student = user.parent_account.children
+    if user_type == 'std' or user_type == 'prn':
+        student = getting_studentaccount_from_user(user)
         return render(request, 'home/student_profile.html', {'user':user, 'student':student})
     elif user_type == 'tch':
         return render(request, 'home/teacher_profile.html', {'user':user})
     else:
-        return HttpResponseForbidden('شما مجاز به دسترسی به این صفحه نیستید.')
+        raise PermissionDenied('شما مجاز به دسترسی به این صفحه نیستید.')
 
 @login_required    
 def student_scores(request, grade=None):
-    if request.user.user_type == 'std':
+    user_type = request.user.user_type
+    if user_type == 'std' or user_type == 'prn':
         try:
-            student = request.user.student_account
+            student = getting_studentaccount_from_user(request.user)
         except StudentAccount.DoesNotExist:
-            raise PermissionDenied('کاربر مجاز نمی باشد')
-    elif request.user.user_type == 'prn':
-        try:
-            student = request.user.parent_account.children
-        except StudentAccount.DoesNotExist:
-            raise PermissionDenied('کاربر دانش آموز نمی باشد')
+            raise PermissionDenied('کاربر مجاز نمی باشد')    
     avg_map = {
         '10':student.avg_1,
         '11':student.avg_2,
@@ -86,17 +85,22 @@ def student_scores(request, grade=None):
     }
     if grade:
         terms = student.term_student.filter(term_lesson__grade_level=grade)
-    return render(request, 'home/student_scores.html', {"terms":terms, "grade":grade_map[grade], "avg":avg_map[grade], "student_grade":student.grade_level})
+    context = {
+        "terms":terms,
+        "grade":grade_map[grade],
+        "avg":avg_map[grade],
+        "student_grade":student.grade_level,
+        }
+    return render(request, 'home/student_scores.html', context)
 
 @login_required
 def student_schedule(request):
+    user_type = request.user.user_type
     try:
-        if request.user.user_type == 'std':
-            student = request.user.student_account
-        elif request.user.user_type == 'prn':
-            student = request.user.parent_account.children
+        if user_type == 'std' or user_type == 'prn':
+            student = getting_studentaccount_from_user(request.user)
     except StudentAccount.DoesNotExist:
-        raise PermissionDenied('کاربر دانش آموز نمی باشد')
+        raise PermissionDenied('کاربر مجاز نمی باشد')
     
     student_grade = student.grade_level
     student_term = student.term_student.filter(term_lesson__grade_level=student_grade)
@@ -131,7 +135,6 @@ def teacher_profile_for_prn(request, teacher_id):
         'teacher':teacher,
         'tickets':tickets,
     }
-
     return render(request, 'home/teacher_profile_for_prn.html', context)
 
 def parent_ticket(request, teacher_id):

@@ -7,7 +7,6 @@ class StudentSigninForm(forms.Form):
     password = forms.CharField(max_length=100, required=True, widget=forms.PasswordInput, label='رمز عبور')
     student_id = forms.IntegerField(required=True, label='شناسه دانش آموز')
 
-
     def clean(self):
         cd = super().clean()
         username = cd.get('username')
@@ -18,7 +17,7 @@ class StudentSigninForm(forms.Form):
             user = authenticate(username=username, password=password)
             if user is None:
                 raise forms.ValidationError('نام کاربری یا رمز عبور اشتباه است')
-            if user.student_account.id_student != student_id:
+            if not user.student_account.id_student == student_id:
                 raise forms.ValidationError('شناسه کاربری دانش آموز مطابقت ندارد')
             self.user = user
         return cd
@@ -27,7 +26,6 @@ class TeacherSigninForm(forms.Form):
     username = forms.CharField(max_length=100, required=True, label='نام کاربری')
     password = forms.CharField(max_length=100, required=True, widget=forms.PasswordInput, label='رمز عبور')
     teacher_id = forms.IntegerField(required=True, label='شناسه معلم')
-
 
     def clean(self):
         cd = super().clean()
@@ -39,7 +37,7 @@ class TeacherSigninForm(forms.Form):
             user = authenticate(username=username, password=password)
             if user is None:
                 raise forms.ValidationError('نام کاربری یا رمز عبور اشتباه است')
-            if user.teacher_account.id_teacher != teacher_id:
+            if not user.teacher_account.id_teacher == teacher_id:
                 raise forms.ValidationError('شناسه کاربری مطابقت ندارد')
             self.user = user
         return cd
@@ -48,7 +46,6 @@ class ParentSigninForm(forms.Form):
     username = forms.CharField(max_length=100, required=True, label='نام کاربری')
     password = forms.CharField(max_length=100, required=True, widget=forms.PasswordInput, label='رمز عبور')
     student_id = forms.IntegerField(required=True, label='شناسه دانش آموز شما')
-
 
     def clean(self):
         cd = super().clean()
@@ -60,14 +57,14 @@ class ParentSigninForm(forms.Form):
             user = authenticate(username=username, password=password)
             if user is None:
                 raise forms.ValidationError('نام کاربری یا رمز عبور اشتباه است')
-            if user.parent_account.children.id_student != student_id:
+            if not user.parent_account.children.id_student == student_id:
                 raise forms.ValidationError('شناسه کاربری دانش آموز شما مطابقت ندارد')
             self.user = user
         return cd
     
 class ParentTicketForm(forms.Form):
     title = forms.CharField(max_length=100, required=True, label='موضوع پیام شما')
-    description = forms.CharField(max_length=1000, required=True,widget=forms.Textarea, label='موضوع پیام شما')
+    description = forms.CharField(max_length=1000, required=True,widget=forms.Textarea, label='متن پیام شما')
 
 class RecordScore(forms.Form):
     score = forms.DecimalField(max_digits=4, decimal_places=2, max_value=20, min_value=1, label='نمره')
