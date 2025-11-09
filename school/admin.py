@@ -55,33 +55,26 @@ class UserPanelAdmin(UserAdmin):
     ]
     inlines = [ManagerAccountInline, StudentAccountInline, TeacherAccountInline, ParentAccountInline]
 
-    def get_inline_instances(self, request, instance=None):  
-        inline_instances = []
-
-        target_type = None
+    def get_inline_instances(self, request, instance=None):
+        inline_instance = []
+        inline_map = {
+            'mng':ManagerAccountInline,
+            'std':StudentAccountInline,
+            'tch':TeacherAccountInline,
+            'prn':ParentAccountInline,
+        }
         if instance:
-            target_type = getattr(instance, 'user_type', None)
-            for inline_class in self.inlines:
-                should_include = False
-
-                if target_type:
-                    if inline_class is ManagerAccountInline and target_type == 'mng':
-                        should_include = True
-                    elif inline_class is StudentAccountInline and target_type =='std':
-                        should_include = True
-                    elif inline_class is TeacherAccountInline and target_type == 'tch':
-                        should_include = True
-                    elif inline_class is ParentAccountInline and target_type == 'prn':
-                        should_include = True
-                if should_include:
-                    inline = inline_class(self.model, self.admin_site)
-                    inline_instances.append(inline)
-            return inline_instances
+            user_type = getattr(instance, 'user_type', None)
+            print(user_type)
+            if user_type:
+                inline = inline_map.get(user_type)
+                inline_instance.append(inline(self.model, self.admin_site))
+                return inline_instance
         else:
-            for inline_class in self.inlines:
-                inline = inline_class(self.model, self.admin_site)
-                inline_instances.append(inline)
-            return inline_instances
+            inline_instance = [inline(self.model, self.admin_site) for inline in self.inlines]
+            return inline_instance
+
+
 
 @admin.register(ParentAccount)
 class ParentPanelAdmin(admin.ModelAdmin):
