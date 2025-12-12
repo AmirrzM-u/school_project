@@ -29,10 +29,6 @@ def home(request):
 
     return render(request, "base/home.html", context)
 
-def news_detail(request, news_id):
-    news = get_object_or_404(SchoolNews, id=news_id)
-    return render(request, 'home/school_news.html', {'news':news})
-
 FORM_MAP = {
     'student':StudentSigninForm,
     'teacher':TeacherSigninForm,
@@ -64,6 +60,11 @@ def user_profile(request):
         return render(request, 'home/teacher_profile.html', {'user':user})
     else:
         raise PermissionDenied('شما مجاز به دسترسی به این صفحه نیستید.')
+
+
+def news_detail(request, news_id):
+    news = get_object_or_404(SchoolNews, id=news_id)
+    return render(request, 'home/school_news.html', {'news':news})
 
 @login_required    
 def student_scores(request, grade=None):

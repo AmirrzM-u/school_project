@@ -42,13 +42,13 @@ class User(AbstractUser):
     
     @property
     def age(self):
-        time = jdatetime.date.today().year
+        time = jdatetime.date.today()
         if self.date_of_birth:
-            birth = self.date_of_birth.year
+            birth = self.date_of_birth
         else:
             return None
         age = time - birth
-        return age
+        return age.days // 365
 
     def __str__(self):
         return f"{self.first_name}-{self.last_name}-{self.user_type}"
@@ -235,7 +235,3 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"parent: {self.parent.user.last_name}-{self.title} to: {self.teacher.user.last_name}"
-
-
-
-

@@ -16,6 +16,4 @@ urlpatterns = [
     path('parent_ticket/<int:teacher_id>', views.parent_ticket, name='parent_ticket'),
     path('record_scores/', views.record_scores, name='record_scores'),
     path('ticket_response/', views.ticket_response, name='ticket_response')
-
-
 ]
