@@ -92,6 +92,7 @@ DATABASES = {
         'NAME': 'school_db',
         'USER': 'amir_admin',
         'PASSWORD': '110115125',
+        'HOST': '127.0.0.1',
         'PORT': '5432',
     }
 }
@@ -124,7 +125,7 @@ AUTHENTICATION_BACKENDS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/tehran'
+TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
 
