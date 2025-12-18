@@ -156,6 +156,12 @@ class StudentTerm(models.Model):
         return year
 
     class Meta:
+        permissions = [
+            (
+                'can_change_score',
+                'Can set and change student scores'
+            )
+        ]
         ordering = ['term_teacher']
         indexes = [
             models.Index(fields=['term_teacher', 'term_lesson'])
