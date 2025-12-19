@@ -3,10 +3,32 @@
 from django.db import migrations
 
 
+
+def create_groups_and_permissions(apps, schema_editor):
+    '''
+    Creating groups and giving permissions
+    '''
+
+    # getting essential models (we can't import models in a migration file)
+    Group = apps.get_model("auth", "Group")
+    Permission = apps.get_model("auth", "Permission")
+    ContentType = apps.get_model("contenttype", "ContentType")
+
+    # creating groups
+    teachers_group, created = Group.objects.get_or_create(name="Teachers")
+    parents_group, creatd = Group.objects.get_or_create(name="Parents")
+    students_group, created = Group.objects.get_or_create(name="Students")
+
+    # getting needed models from models.py
+    StudentTerm = apps.get_model("school", "StudentTerm")
+    
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
         ('school', '0019_alter_studentterm_options'),
+        ('auth', '0012_alter_user_first_name_max_length')
     ]
 
     operations = [

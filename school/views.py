@@ -13,22 +13,6 @@ def getting_studentaccount_from_user(user):
     elif user.user_type == 'prn':
         return user.parent_account.children
 
-
-def home(request):
-    school_news = SchoolNews.objects.all()
-    students_number = StudentAccount.objects.all().count()
-    class_numbers = Classroom.objects.all().count()
-    teachers_number = TeacherAccount.objects.all().count()
-
-    context = {
-        'school_news': school_news,
-        'student_number': students_number,
-        'class_number': class_numbers,
-        'teachers_number': teachers_number,
-    }
-
-    return render(request, "base/home.html", context)
-
 FORM_MAP = {
     'student':StudentSigninForm,
     'teacher':TeacherSigninForm,
@@ -60,6 +44,20 @@ def user_profile(request):
         return render(request, 'home/teacher_profile.html', {'user':user})
     else:
         raise PermissionDenied('شما مجاز به دسترسی به این صفحه نیستید.')
+
+def home(request):
+    school_news = SchoolNews.objects.all()
+    students_number = StudentAccount.objects.all().count()
+    class_numbers = Classroom.objects.all().count()
+    teachers_number = TeacherAccount.objects.all().count()
+
+    context = {
+        'school_news': school_news,
+        'student_number': students_number,
+        'class_number': class_numbers,
+        'teachers_number': teachers_number,
+    }
+    return render(request, "base/home.html", context)
 
 
 def news_detail(request, news_id):
@@ -184,5 +182,4 @@ def ticket_response(request):
         ticket.status = 'true'
         ticket.save()
         return redirect('ticket_response')
-
     return render(request, 'home/ticket_response.html', {'tickets':tickets, 'form':form})

@@ -237,6 +237,16 @@ class Ticket(models.Model):
         indexes = [
             models.Index(fields=['status'])
         ]
+        pemissions = [
+            (
+                'teacher_response',
+                'Allows teachers to give respone to parents tickets'
+            ),
+            (
+                'parent_ticket',
+                'Can send tickets to teachers'
+            )
+        ]
         verbose_name_plural = 'پیام'
 
     def __str__(self):
