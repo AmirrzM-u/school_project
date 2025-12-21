@@ -1,24 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import ListView, DetailView
 from .models import *
 from .forms import *
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseForbidden
 
-
-def getting_studentaccount_from_user(user):
-    if user.user_type == 'std':
-        return user.student_account
-    elif user.user_type == 'prn':
-        return user.parent_account.children
-
-FORM_MAP = {
-    'student':StudentSigninForm,
-    'teacher':TeacherSigninForm,
-    'parent':ParentSigninForm,
-}
 
 def user_signin(request, user_type):
     form_class = FORM_MAP.get(user_type)
@@ -46,24 +34,25 @@ def user_profile(request):
     else:
         raise PermissionDenied('شما مجاز به دسترسی به این صفحه نیستید.')
 
-def home(request):
-    school_news = SchoolNews.objects.all()
+class Home(ListView):
+    model = SchoolNews
     students_number = StudentAccount.objects.all().count()
     class_numbers = Classroom.objects.all().count()
     teachers_number = TeacherAccount.objects.all().count()
+    context_object_name = 'school_news'
+    template_name = "base/home.html"
 
-    context = {
-        'school_news': school_news,
+    extra_context = {
         'student_number': students_number,
         'class_number': class_numbers,
         'teachers_number': teachers_number,
     }
-    return render(request, "base/home.html", context)
 
 
-def news_detail(request, news_id):
-    news = get_object_or_404(SchoolNews, id=news_id)
-    return render(request, 'home/school_news.html', {'news':news})
+class NewsDetail(DetailView):
+    model = SchoolNews
+    template_name = 'home/school_news.html'
+    context_object_name = 'news'
 
 @login_required    
 def student_scores(request, grade=None):
@@ -154,6 +143,7 @@ def parent_ticket(request, teacher_id):
         return redirect('teacher_profile_for_prn', teacher_id)
     return render(request, 'home/parent_ticket.html', {'form':form})
 
+@permission_required('can_change_score', raise_exception=True)
 def record_scores(request):
     if request.user.user_type != 'tch':
         raise PermissionDenied('شما به این صفحه دسترسی ندایرید')
@@ -169,6 +159,7 @@ def record_scores(request):
         return redirect('record_scores', )
     return render(request, 'home/record_scores.html', {'teacher':teacher, 'terms':terms, 'form':form})
 
+@permission_required("teacher_response", raise_exception=True)
 def ticket_response(request):
     if request.user.user_type != 'tch':
         raise PermissionDenied('شما به این صفحه دسترسی ندایرید')
@@ -184,3 +175,15 @@ def ticket_response(request):
         ticket.save()
         return redirect('ticket_response')
     return render(request, 'home/ticket_response.html', {'tickets':tickets, 'form':form})
+
+def getting_studentaccount_from_user(user):
+    if user.user_type == 'std':
+        return user.student_account
+    elif user.user_type == 'prn':
+        return user.parent_account.children
+
+FORM_MAP = {
+    'student':StudentSigninForm,
+    'teacher':TeacherSigninForm,
+    'parent':ParentSigninForm,
+}
