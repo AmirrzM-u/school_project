@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseForbidden
 
+
 def getting_studentaccount_from_user(user):
     if user.user_type == 'std':
         return user.student_account

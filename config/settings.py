@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'school.apps.SchoolConfig',
     'api.apps.ApiConfig',
     'rest_framework'
-
 ]
 
 MIDDLEWARE = [

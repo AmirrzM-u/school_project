@@ -237,7 +237,7 @@ class Ticket(models.Model):
         indexes = [
             models.Index(fields=['status'])
         ]
-        pemissions = [
+        permissions = [
             (
                 'teacher_response',
                 'Allows teachers to give respone to parents tickets'
