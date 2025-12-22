@@ -65,14 +65,16 @@ class UserPanelAdmin(UserAdmin):
         }
         if instance:
             user_type = getattr(instance, 'user_type', None)
-            print(user_type)
+            print("user_type is: ", user_type)
             if user_type:
+                print("you are here")
                 inline = inline_map.get(user_type)
                 inline_instance.append(inline(self.model, self.admin_site))
                 return inline_instance
-        else:
-            inline_instance = [inline(self.model, self.admin_site) for inline in self.inlines]
-            return inline_instance
+
+        print("you are there")
+        inline_instance = [inline(self.model, self.admin_site) for inline in self.inlines]
+        return inline_instance
 
 
 
