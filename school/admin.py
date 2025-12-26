@@ -3,7 +3,7 @@ from .models import *
 from django.contrib.auth.admin import UserAdmin
 from django_jalali.admin.filters import JDateFieldListFilter
 
-# Creating accounts inlines for users and different user_types
+# Accounts inlines for users (each user can have maximum one account)
 class ManagerAccountInline(admin.StackedInline):
     model = ManagerAccount
     extra = 0
@@ -24,14 +24,17 @@ class ParentAccountInline(admin.StackedInline):
     extra = 0
     max_num = 1
 
+# Image inline for attaching images to school news posts
 class ImageInline(admin.StackedInline):
     model = ImageModel
     extra = 1
 
-# registering User model and creating a panel for it
+# Custom admin panel for User model
 @admin.register(User)
 class UserPanelAdmin(UserAdmin):
+
     # Proper description for user last_name, first_name and email for list_displays in persian
+    # that changes fields column headers to persian in list_display
     @admin.display(description='نام خانوادگی')
     def user_last_name(self, instance):
         return instance.last_name
@@ -47,7 +50,7 @@ class UserPanelAdmin(UserAdmin):
     list_filter = ['user_type']
     ordering = ['user_type']
 
-    # adding extra fields from AbstractUser in models.py as user info
+    # Adding extra fields from custom AbstractUser to User admin as user info
     fieldsets = list(UserAdmin.fieldsets) + [
         (
             'user info', {
@@ -57,6 +60,7 @@ class UserPanelAdmin(UserAdmin):
             }
         )
     ]
+
     # Adding Inlines
     inlines = [ManagerAccountInline, StudentAccountInline, TeacherAccountInline, ParentAccountInline]
 
@@ -85,33 +89,35 @@ class UserPanelAdmin(UserAdmin):
         return inline_instance
 
 
-# registering ParentAccount model and creating a panel for it
+# Custom admin panel for ParentAccount model
 @admin.register(ParentAccount)
 class ParentPanelAdmin(admin.ModelAdmin):
     list_display = ['user__last_name']
     search_fields = ['user__first_name', 'user__last_name']
-    readonly_fields = ['children']
 
-    # Adding childrens for parents and Proper description for it in persian
+    # Adding parents children as read_only 
     @admin.display(description='فرزندان')
     def children(self, instance):
         childrens = instance.children.all()
         return list(f"{children.user.first_name}-{children.user.last_name}" for children in childrens)
+    
+    readonly_fields = ['children']
 
-# registering TeacherAccount model and creating a panel for it
+# Custom admin panel for TeacherAccount model
 @admin.register(TeacherAccount)
 class TeacherPanelAdmin(admin.ModelAdmin):
     list_display = ['user__last_name']
     search_fields = ['user__first_name', 'user__last_name']
     
-    # Adding students for teachers and Proper description for it in persian
+    # Adding teachers current students as read_only
     @admin.display(description='دانش آموزان', empty_value='بدون دانش آموز')
     def students_list(self, instance):
       students = instance.students.filter(term_student__active_term=True)
       return str([student.user.last_name for student in students])
+    
     readonly_fields = ['students_list']
 
-# registering StudentAccount model and creating a panel for it
+# Custom admin panel for StudentAccount model
 @admin.register(StudentAccount)
 class StudentPanelAdmin(admin.ModelAdmin):
 
@@ -132,31 +138,29 @@ class StudentPanelAdmin(admin.ModelAdmin):
     list_filter = [('entry', JDateFieldListFilter), 'student_class', 'grade_level']
     search_fields = ['user__first_name', 'user__last_name', 'grade_level']
 
-# registering Classroom model and creating a panel for it
+# Custom admin panel for Classroom model
 @admin.register(Classroom)
 class ClassroomPanelAdmin(admin.ModelAdmin):
     list_display = ['class_number', 'students_number']
     readonly_fields = ['class_students']
 
-    # Adding students for classrooms and Proper description for it in persian
+    # Adding classrooms current students and Proper description for it in persian
     @admin.display(description='دانش آموزان کلاس')
     def class_students(self, instance):
         students = instance.students.filter(current_student=True, graduated=False)
         return list(f"{student.user.first_name} {student.user.last_name}" for student in students)
 
-    # Adding students_number for classrooms and Proper description for it in persian
-    @admin.display(description='تعداد دانش آموز', empty_value='بدون دانش آموز')
+    # Adding the number of current students for each classrooms and Proper description for it in persian
+    @admin.display(description='تعداد دانش آموزان', empty_value='بدون دانش آموز')
     def students_number(self, instance):
         return instance.students.filter(current_student=True, graduated=False).count()
-    
-    students_number.short_description = 'تعداد دانش آموزان'
 
-# registering Lesson model and creating a panel for it
+# Custom admin panel for Lesson model
 @admin.register(Lesson)
 class LessonPanelAdmin(admin.ModelAdmin):
     list_display = ['title', 'grade_level', 'lesson_times']
 
-# registering StudentTerm model and creating a panel for it
+# Custom admin panel for StudentTerm model
 @admin.register(StudentTerm)
 class TermPanelAdmin(admin.ModelAdmin):
     
@@ -172,18 +176,18 @@ class TermPanelAdmin(admin.ModelAdmin):
     list_filter = ['term_lesson', 'term_teacher', ('term_time', JDateFieldListFilter), 'active_term']
     search_fields = ['term_student__user__first_name', 'term_student__user__last_name', 'term_lesson__title', 'term_teacher__user__last_name']
 
-# registering ManagerAccount model and creating a panel for it
+# Custom admin panel for ManagerAccount model
 @admin.register(ManagerAccount)
 class ManagerPanelAdmin(admin.ModelAdmin):
     list_display = ['id_manager']
 
-# registering SchoolNews model and creating a panel for it
+# Custom admin panel for SchoolNews model
 @admin.register(SchoolNews)
 class SchoolNewsPanelAdmin(admin.ModelAdmin):
     list_display = ['title']
     inlines = [ImageInline]
 
-# registering Ticket model and creating a panel for it
+# Custom admin panel for Ticket model
 @admin.register(Ticket)
 class TicketPanelAdmin(admin.ModelAdmin):
     list_display = ['title', 'status']

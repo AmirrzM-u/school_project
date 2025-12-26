@@ -6,7 +6,7 @@ from django.core.validators import RegexValidator, MaxValueValidator
 import jdatetime
 from django.db.models import Avg
 
-# This model stores classrooms number and it reperesnts as schools classes
+# Classroom model stores classrooms numbers in the school
 class Classroom(models.Model):
     class_number = models.CharField(max_length=3, verbose_name='شماره کلاس')
     

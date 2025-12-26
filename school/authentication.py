@@ -1,7 +1,9 @@
 from .models import User
 
-# A custom AuthBackend that allows users log in using their phone number instead of username
+# Custom Authentication Backend  
+# Allows users to login using their phone number instead of username
 class PhonenumberAuthBackend:
+
     # usrename is treated as phone number here
     def authenticate(self, request, username=None, password=None):
         try:
@@ -11,6 +13,7 @@ class PhonenumberAuthBackend:
             return None
         except User.DoesNotExist:
             return None
+    
     def get_user(self, user_id):
         try:
             return User.objects.get(pk=user_id)

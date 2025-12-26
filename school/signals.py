@@ -5,7 +5,7 @@ from django.db.models import Avg
 from django.contrib.auth.models import Group
 from django.db import transaction
 
-# Updating the students avergaes when a new scode is recorded
+# Updating the students avergaes when a new score is recorded
 @receiver(post_save, sender=StudentTerm)
 def updating_avg(sender, instance, **kwargs):
     if instance.student_score != 0:
@@ -30,6 +30,8 @@ def assigning_users_to_groups(sender, instance, created, **kwargs):
 
         group_name = group_map[user_type]
         group = Group.objects.get(name=group_name)
+        
+        # Safely add user to group after DB save is fully completed
         transaction.on_commit(lambda: instance.groups.add(group))
 
             
