@@ -1,146 +1,111 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import ListView, DetailView
 from .models import *
 from .forms import *
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseForbidden
 
-
-def home(request):
-    school_news = SchoolNews.objects.all()
-    students_number = StudentAccount.objects.all().count()
-    class_numbers = Classroom.objects.all().count()
-    teachers_number = TeacherAccount.objects.all().count()
-
-    context = {
-        'school_news': school_news,
-        'student_number': students_number,
-        'class_number': class_numbers,
-        'teachers_number': teachers_number,
-    }
-
-    return render(request, "base/home.html", context)
-
-def news_detail(request, news_id):
-    news = get_object_or_404(SchoolNews, id=news_id)
-    return render(request, 'home/school_news.html', {'news':news})
-
-
+# Sending the proper form to users for loging in based on their user_type 
 def user_signin(request, user_type):
-    if user_type == 'student':
-        form = StudentSigninForm(request.POST or None)
+    FORM_MAP = {
+    'student':StudentSigninForm,
+    'teacher':TeacherSigninForm,
+    'parent':ParentSigninForm,
+        }
+    form_class = FORM_MAP.get(user_type)
+    if form_class:
+        form = form_class(request.POST or None)
         if form.is_valid():
             login(request, form.user)
             return redirect('home')
-        return render(request, 'registration/login.html', {'form':form})
-    elif user_type == 'teacher':
-        form = TeacherSigninForm(request.POST or None)
-        if form.is_valid():
-            login(request, form.user)
-            return redirect('home')
-        return render(request, 'registration/login.html', {'form':form})
-    elif user_type == 'parent':
-        form = ParentSigninForm(request.POST or None)
-        if form.is_valid():
-            login(request, form.user)
-            return redirect('home')
-        return render(request, 'registration/login.html', {'form':form})        
+    return render(request, 'registration/login.html', {'form':form})       
 
 @login_required
 def user_logout(request):
     logout(request)
     return redirect('home')
 
+# Showing users profile based on their user_type
 @login_required
 def user_profile(request):
     user_type = request.user.user_type
-    if user_type == 'std':
-        user = request.user
-        student = user.student_account
-        return render(request, 'home/student_profile.html', {'user':user, 'student':student})
-    elif user_type == 'prn':
-        user = request.user
-        student = user.parent_account.children
+    user = request.user
+    if user_type == 'std' or user_type == 'prn':
+        student = getting_studentaccount_from_user(user)
         return render(request, 'home/student_profile.html', {'user':user, 'student':student})
     elif user_type == 'tch':
-        user = request.user
         return render(request, 'home/teacher_profile.html', {'user':user})
+    else:
+        raise PermissionDenied('شما مجاز به دسترسی به این صفحه نیستید.')
 
+# Home page including school news and some data about the school
+class Home(ListView):
+    model = SchoolNews
+    students_number = StudentAccount.objects.all().count()
+    class_numbers = Classroom.objects.all().count()
+    teachers_number = TeacherAccount.objects.all().count()
+    context_object_name = 'school_news'
+    template_name = "base/home.html"
+
+    extra_context = {
+        'student_number': students_number,
+        'class_number': class_numbers,
+        'teachers_number': teachers_number,
+    }
+
+# Showing news detail
+class NewsDetail(DetailView):
+    model = SchoolNews
+    template_name = 'home/school_news.html'
+    context_object_name = 'news'
+
+# Showing students reprt card to their parents and the students
 @login_required    
-def student_scores(request):
-    if request.user.user_type == 'std':
+def student_scores(request, grade=None):
+    user_type = request.user.user_type
+    if user_type == 'std' or user_type == 'prn':
         try:
-            student = request.user.student_account
+            student = getting_studentaccount_from_user(request.user)
         except StudentAccount.DoesNotExist:
-            raise PermissionDenied('کاربر دانش آموز نمی باشد')
-        student_term = student.term_student
-
-    if request.user.user_type == 'prn':
-        try:
-            student = request.user.parent_account.children
-        except StudentAccount.DoesNotExist:
-            raise PermissionDenied('کاربر دانش آموز نمی باشد')
-        student_term = student.term_student
-
-    grade_10 = student_term.filter(term_lesson__grade_level = '10')
-    scores_1 = [term.student_score for term in grade_10]
-    avg_1 = sum(scores_1) / len(scores_1) if scores_1 else 0
-
-    grade_11 = student_term.filter(term_lesson__grade_level = '11')
-    scores_2 = [term.student_score for term in grade_11]
-    avg_2 = sum(scores_2) / len(scores_2) if scores_2 else 0
-    
-    grade_12 = student_term.filter(term_lesson__grade_level = '12')
-    scores_3 = [term.student_score for term in grade_12]
-    avg_3 = sum(scores_3) / len(scores_3) if scores_3 else 0
-
-    student.avg_1 = avg_1
-    student.avg_2 = avg_2
-    student.avg_3 = avg_3
-    
-    student.save(update_fields=['avg_1', 'avg_2', 'avg_3'])
-
-    if student.grade_level == '10':
-        context = {
-            'student': student,
-            'student_term':student_term,
-            'grade_10':grade_10,
+            raise PermissionDenied('کاربر مجاز نمی باشد')    
+    avg_map = {
+        '10':student.avg_1,
+        '11':student.avg_2,
+        '12':student.avg_3,
+    }
+    grade_map = {
+        '10':'دهم',
+        '11':'یازدهم',
+        '12':'دوازدهم',
+    }
+    if grade:
+        terms = student.term_student.filter(term_lesson__grade_level=grade)
+    context = {
+        "terms":terms,
+        "grade":grade_map[grade],
+        "avg":avg_map[grade],
+        "student_grade":student.grade_level,
         }
-    elif student.grade_level == '11':
-        context = {
-            'student': student,
-            'student_term':student_term,
-            'grade_10':grade_10,
-            'grade_11':grade_11
-        }
-    elif student.grade_level == '12':
-        context = {
-            'student': student,
-            'student_term':student_term,
-            'grade_10':grade_10,
-            'grade_11':grade_11,
-            'grade_12':grade_12
-        }
-
     return render(request, 'home/student_scores.html', context)
 
+# Students schedule
 @login_required
 def student_schedule(request):
+    user_type = request.user.user_type
     try:
-        if request.user.user_type == 'std':
-            student = request.user.student_account
-        elif request.user.user_type == 'prn':
-            student = request.user.parent_account.children
-
+        if user_type == 'std' or user_type == 'prn':
+            student = getting_studentaccount_from_user(request.user)
     except StudentAccount.DoesNotExist:
-        raise PermissionDenied('کاربر دانش آموز نمی باشد')
+        raise PermissionDenied('کاربر مجاز نمی باشد')
     
     student_grade = student.grade_level
     student_term = student.term_student.filter(term_lesson__grade_level=student_grade)
 
     return render(request, 'home/student_schedule.html', {'student_term':student_term})
 
+# Showing students report card and each lessons teacher to parents
 @login_required
 def teacher_panel_for_parents(request):
     parent = request.user
@@ -156,6 +121,7 @@ def teacher_panel_for_parents(request):
     }
     return render(request, 'home/teacher_panel_for_parents.html', context)
 
+# Showing teachers profile to parents
 @login_required
 def teacher_profile_for_prn(request, teacher_id):
     parent = request.user
@@ -169,9 +135,9 @@ def teacher_profile_for_prn(request, teacher_id):
         'teacher':teacher,
         'tickets':tickets,
     }
-
     return render(request, 'home/teacher_profile_for_prn.html', context)
 
+# Sending tickets to teachers by parents
 def parent_ticket(request, teacher_id):
     if request.user.user_type != 'prn':
         raise PermissionDenied('شما به این صفحه دسترسی ندایرید')
@@ -189,6 +155,8 @@ def parent_ticket(request, teacher_id):
         return redirect('teacher_profile_for_prn', teacher_id)
     return render(request, 'home/parent_ticket.html', {'form':form})
 
+# Recording students scores by teachers
+@permission_required('can_change_score', raise_exception=True)
 def record_scores(request):
     if request.user.user_type != 'tch':
         raise PermissionDenied('شما به این صفحه دسترسی ندایرید')
@@ -204,6 +172,8 @@ def record_scores(request):
         return redirect('record_scores', )
     return render(request, 'home/record_scores.html', {'teacher':teacher, 'terms':terms, 'form':form})
 
+# Sending parents tickets responses by teachers
+@permission_required("teacher_response", raise_exception=True)
 def ticket_response(request):
     if request.user.user_type != 'tch':
         raise PermissionDenied('شما به این صفحه دسترسی ندایرید')
@@ -218,5 +188,12 @@ def ticket_response(request):
         ticket.status = 'true'
         ticket.save()
         return redirect('ticket_response')
-
     return render(request, 'home/ticket_response.html', {'tickets':tickets, 'form':form})
+
+# Returning students account based on the user that wants it
+def getting_studentaccount_from_user(user):
+    if user.user_type == 'std':
+        return user.student_account
+    elif user.user_type == 'prn':
+        return user.parent_account.children
+

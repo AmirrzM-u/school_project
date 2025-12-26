@@ -14,6 +14,7 @@
             <h3 class="student_information"> {% if user.user_type == 'prn' %}کارتابل دانش آموز شما: {{ student.user.first_name }} {{ student.user.last_name }} {% elif user.user_type == 'std' %}کارتابل دانش آموز: {{ user.first_name }} {{ user.last_name }} {% endif %}</h3>
             <h4 class="student_information">شناسه دانش آموز: {{ student.id_student }}</h4>
             <h4 class="student_information">تاریخ تولد: {{ student.user.date_of_birth }}</h4>
+            <h4 class="student_information">سن: {{ student.user.age }}</h4>
             <h4 class="student_information">ورودی سال: {{ student.entry_year }}</h4>
             <h4 class="student_information">پایه: {{ student.grade_level }}</h4>
         </div>
@@ -21,7 +22,7 @@
     
     <ul class="student_option_list">
         <li class="student_option">
-            <a class="link_student_option" href="{% url 'student_scores' %}">دروس سال تحصیلی جاری دانش آموز</a>
+            <a class="link_student_option" href="{% url 'student_scores' grade=student.grade_level %}">دروس سال تحصیلی جاری دانش آموز</a>
         </li>
 
         <li class="student_option">

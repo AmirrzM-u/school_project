@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'school.apps.SchoolConfig',
     'api.apps.ApiConfig',
     'rest_framework'
-
 ]
 
 MIDDLEWARE = [
@@ -89,9 +88,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'School_database',
-        'USER': 'Amir_admin',
+        'NAME': 'school_db',
+        'USER': 'amir_admin',
         'PASSWORD': '110115125',
+        'HOST': '127.0.0.1',
         'PORT': '5432',
     }
 }
@@ -114,13 +114,17 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'school.authentication.PhonenumberAuthBackend'
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/tehran'
+TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
 

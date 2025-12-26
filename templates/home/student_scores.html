@@ -3,10 +3,11 @@
 {% block title %} score {% endblock title %}
 
 {% block content %}
-<div  class="student_grade_10_container">
-    <h4 class="student_grade_10_scores_message">دروس پایه دهم</h4>
-    <table class="student_grade_10_table">
-        {% for term in grade_10 %}
+
+<div  class="student_grade_container">
+    <h4 class="student_grade_scores_message">دروس پایه:  {{ grade }}</h4>
+    <table class="student_grade_table">
+        {% for term in terms %}
             <tr class="row_names_container">
                 <th class="row_name">درس</th>
                 <th class="row_name">نمره</th>
@@ -21,12 +22,42 @@
             <h4 class="no_data_message">شما این پایه را نگذرانده اید</h4>
         {% endfor %}
     </table>
-    {% if student.avg_1 == 0 %}
-    {% else %}
-        <h4 class="avg1_container">معدل این ترم شما: {{ student.avg_1 }}</h4>
+    {% if avg %}
+        <h4 class="avg_container">معدل این سال تحصیلی شما: {{ avg }}</h4>
+    {% endif %}
+    {% if student_grade == '11' %}
+        <div class="student_other_term_options">
+            <h3 class="other_term_option"><a href="{% url 'student_scores' grade='10' %}">نمایش دروس  پایه دهم</a></h3>
+            <h3 class="other_term_option"><a href="{% url 'student_scores' grade='11' %}">نمایش دروس  سال جاری</a></h3>
+        </div>
+    {% elif student_grade == '12' %}
+        <div class="student_other_term_options">
+            <h3 class="other_term_option"><a href="{% url 'student_scores' grade='10' %}">نمایش دروس  پایه دهم</a></h3>
+            <h3 class="other_term_option"><a href="{% url 'student_scores' grade='11' %}">نمایش دروس  سال یازدهم</a></h3>
+            <h3 class="other_term_option"><a href="{% url 'student_scores' grade='12' %}">نمایش دروس  سال جاری</a></h3>
+        </div>
     {% endif %}
 </div>
-<div  class="student_grade_11_container">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <div  class="student_grade_11_container">
     <h4 class="student_grade_11_scores_message">دروس پایه یازدهم</h4>
     <table class="student_grade_11_table">
         {% for term in grade_11 %}
@@ -48,8 +79,8 @@
     {% else %}
         <h4 class="avg1_container">معدل این ترم شما: {{ student.avg_1 }}</h4>
     {% endif %}
-</div>
-<div  class="student_grade_12_container">
+</div> -->
+<!-- <div  class="student_grade_12_container">
     <h4 class="student_grade_12_scores_message">دروس پایه دوازدهم</h4>
     <table class="student_grade_12_table">
         {% for term in grade_12 %}
@@ -71,7 +102,7 @@
     {% else %}
         <h4 class="avg3_container">معدل این ترم شما: {{ student.avg_1 }}</h4>
     {% endif %}
-</div>
+</div> -->
 
 {% endblock content %}
 
