@@ -7,8 +7,13 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseForbidden
 
-
+# Sending the proper form to users for loging in based on their user_type 
 def user_signin(request, user_type):
+    FORM_MAP = {
+    'student':StudentSigninForm,
+    'teacher':TeacherSigninForm,
+    'parent':ParentSigninForm,
+        }
     form_class = FORM_MAP.get(user_type)
     if form_class:
         form = form_class(request.POST or None)
@@ -22,6 +27,7 @@ def user_logout(request):
     logout(request)
     return redirect('home')
 
+# Showing users profile based on their user_type
 @login_required
 def user_profile(request):
     user_type = request.user.user_type
@@ -34,6 +40,7 @@ def user_profile(request):
     else:
         raise PermissionDenied('شما مجاز به دسترسی به این صفحه نیستید.')
 
+# Home page including school news and some data about the school
 class Home(ListView):
     model = SchoolNews
     students_number = StudentAccount.objects.all().count()
@@ -48,12 +55,13 @@ class Home(ListView):
         'teachers_number': teachers_number,
     }
 
-
+# Showing news detail
 class NewsDetail(DetailView):
     model = SchoolNews
     template_name = 'home/school_news.html'
     context_object_name = 'news'
 
+# Showing students reprt card to their parents and the students
 @login_required    
 def student_scores(request, grade=None):
     user_type = request.user.user_type
@@ -82,6 +90,7 @@ def student_scores(request, grade=None):
         }
     return render(request, 'home/student_scores.html', context)
 
+# Students schedule
 @login_required
 def student_schedule(request):
     user_type = request.user.user_type
@@ -96,6 +105,7 @@ def student_schedule(request):
 
     return render(request, 'home/student_schedule.html', {'student_term':student_term})
 
+# Showing students report card and each lessons teacher to parents
 @login_required
 def teacher_panel_for_parents(request):
     parent = request.user
@@ -111,6 +121,7 @@ def teacher_panel_for_parents(request):
     }
     return render(request, 'home/teacher_panel_for_parents.html', context)
 
+# Showing teachers profile to parents
 @login_required
 def teacher_profile_for_prn(request, teacher_id):
     parent = request.user
@@ -126,6 +137,7 @@ def teacher_profile_for_prn(request, teacher_id):
     }
     return render(request, 'home/teacher_profile_for_prn.html', context)
 
+# Sending tickets to teachers by parents
 def parent_ticket(request, teacher_id):
     if request.user.user_type != 'prn':
         raise PermissionDenied('شما به این صفحه دسترسی ندایرید')
@@ -143,6 +155,7 @@ def parent_ticket(request, teacher_id):
         return redirect('teacher_profile_for_prn', teacher_id)
     return render(request, 'home/parent_ticket.html', {'form':form})
 
+# Recording students scores by teachers
 @permission_required('can_change_score', raise_exception=True)
 def record_scores(request):
     if request.user.user_type != 'tch':
@@ -159,6 +172,7 @@ def record_scores(request):
         return redirect('record_scores', )
     return render(request, 'home/record_scores.html', {'teacher':teacher, 'terms':terms, 'form':form})
 
+# Sending parents tickets responses by teachers
 @permission_required("teacher_response", raise_exception=True)
 def ticket_response(request):
     if request.user.user_type != 'tch':
@@ -176,14 +190,10 @@ def ticket_response(request):
         return redirect('ticket_response')
     return render(request, 'home/ticket_response.html', {'tickets':tickets, 'form':form})
 
+# Returning students account based on the user that wants it
 def getting_studentaccount_from_user(user):
     if user.user_type == 'std':
         return user.student_account
     elif user.user_type == 'prn':
         return user.parent_account.children
 
-FORM_MAP = {
-    'student':StudentSigninForm,
-    'teacher':TeacherSigninForm,
-    'parent':ParentSigninForm,
-}

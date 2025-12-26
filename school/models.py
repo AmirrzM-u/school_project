@@ -3,11 +3,10 @@ from django.contrib.auth.models import AbstractUser
 from django_jalali.db import models as jmodels
 from django.utils import timezone
 from django.core.validators import RegexValidator, MaxValueValidator
-from django.db.models import Q, CheckConstraint, UniqueConstraint
 import jdatetime
-from datetime import date
 from django.db.models import Avg
 
+# This model stores classrooms number and it reperesnts as schools classes
 class Classroom(models.Model):
     class_number = models.CharField(max_length=3, verbose_name='شماره کلاس')
     
@@ -16,11 +15,13 @@ class Classroom(models.Model):
     def __str__(self):
         return f"class: {self.class_number}"
 
+# This function sets the path for image to be saved based on users full name and the file name
 def profile_img_upload_to(instance, filename):
     user_first_name = instance.first_name
     user_last_name = instance.last_name
     return f"profile_img/{user_first_name}-{user_last_name}/{filename}"
 
+# Using AbstractUser to add some extra feilds for user model and for setting roles by different user types
 class User(AbstractUser):
     phone_number = models.CharField(max_length=11, unique=True, verbose_name='شماره تلفن',
                                     validators=[RegexValidator(
@@ -40,6 +41,7 @@ class User(AbstractUser):
     class Meta:
         verbose_name_plural = 'کاربران'
     
+    # Returns the users age
     @property
     def age(self):
         time = jdatetime.date.today()
@@ -53,6 +55,7 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.first_name}-{self.last_name}-{self.user_type}"
     
+# Managers accounts that stores manager ids and it reperesnts as schools manager
 class ManagerAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='manager_account', verbose_name='کاربر')
     id_manager = models.PositiveSmallIntegerField(default=0, verbose_name='شناسه مدیر')
@@ -63,6 +66,7 @@ class ManagerAccount(models.Model):
     def __str__(self):
         return f"manager: {self.user.last_name}"
 
+# Students accounts that stores students information and it reperesnts as schools students
 class StudentAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_account', verbose_name='کاربر')
     id_student = models.PositiveIntegerField(default=0, unique=True, verbose_name='شناسه دانش آموز')
@@ -82,6 +86,7 @@ class StudentAccount(models.Model):
     student_term = models.ManyToManyField('TeacherAccount', through='StudentTerm', related_name='students',  through_fields=('term_student', 'term_teacher'), blank=True, verbose_name='درس های دانش آموز')
     extra_detail = models.CharField(max_length=500, verbose_name='اطلاعات اضافه', blank=True, null=True)
     
+    # Returning the entry year of the student
     @property
     def entry_year(self):
         if self.entry:
@@ -89,6 +94,7 @@ class StudentAccount(models.Model):
             return shamsi_date.year
         return None
     
+    # Updating the students averages every time a new score is added
     def avg_update(self, grade):
         avg_data = self.term_student.filter(term_lesson__grade_level=grade).exclude(student_score=0).aggregate(avg=Avg('student_score'))
         grade_avg_map = {
@@ -100,6 +106,7 @@ class StudentAccount(models.Model):
         setattr(self, avg_field, avg_data['avg'])
         self.save(update_fields=[avg_field])
     
+    # Custom manager to manage active students only
     class ActiveStudentManager(models.Manager):
         def get_queryset(self):
             return super().get_queryset().filter(current_student=True, graduated=False)
@@ -118,6 +125,7 @@ class StudentAccount(models.Model):
     def __str__(self):
         return f"std:{self.user.first_name}-{self.user.last_name}"
     
+# Parents accounts that stores parents ids and its reperesnts as schools students parents
 class ParentAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='parent_account', verbose_name='کاربر')
     extra_detail = models.CharField(max_length=500, verbose_name='اطلاعات اضافه', null=True, blank=True)
@@ -128,6 +136,7 @@ class ParentAccount(models.Model):
     def __str__(self):
         return f"Mr/Ms {self.user.last_name}"
 
+# Teachers accounts that stores teachers ids and its reperesnts as schools teachers
 class TeacherAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_account', verbose_name='کاربر')
     id_teacher = models.PositiveSmallIntegerField(default=0, verbose_name='شناسه معلم')
@@ -139,6 +148,7 @@ class TeacherAccount(models.Model):
     def __str__(self):
         return f"teacher: {self.user.last_name}"
 
+# This models saves students terms containing their lessons, scores and etc...
 class StudentTerm(models.Model):
     term_lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE, related_name='student_term', verbose_name='درس')
     term_teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='term_teacher', verbose_name='معلم این درس')
@@ -150,12 +160,14 @@ class StudentTerm(models.Model):
     
     objects = jmodels.jManager()
 
+    # Returning the term year
     @property
     def term_year(self):
         year = jdatetime.date.fromgregorian(date=self.term_time).year
         return year
 
     class Meta:
+        # Setting custom permissions for changing the scores
         permissions = [
             (
                 'can_change_score',
@@ -171,6 +183,7 @@ class StudentTerm(models.Model):
     def __str__(self):
         return f"term: {self.term_lesson}-{self.term_teacher.user.last_name}"
     
+# This model stores lessons informations and it reperesnts as schools each grade lessons
 class Lesson(models.Model):
     title = models.CharField(max_length=150, verbose_name='نام درس')
     class GRADE_LEVELS(models.TextChoices):
@@ -195,6 +208,7 @@ def school_news_img_upload_to(instance, filename):
     title = instance.title
     return f"news_imgs/{title}-description_photos/{filename}"
 
+# This model stores schools news information
 class SchoolNews(models.Model):
     title = models.CharField(max_length=100, verbose_name='موضوع')
     title_image = models.ImageField(upload_to=school_news_title_img_upload_to)
@@ -216,11 +230,13 @@ def school_news_img_description_upload_to(instance, filename):
     title = instance.title
     return f"new_imgs/{title}-description_photos/{filename}"
 
+# This model stores images
 class ImageModel(models.Model):
     title = models.CharField(max_length=100, verbose_name='توضیحات عکس')
     news = models.ForeignKey(SchoolNews, on_delete=models.CASCADE, related_name='description_image', verbose_name='خبر')
     image = models.ImageField(upload_to=school_news_img_description_upload_to)
 
+# This model stores parents tickets to teachers
 class Ticket(models.Model):
     parent = models.ForeignKey(ParentAccount, on_delete=models.CASCADE, related_name='parent_tickets', verbose_name='والد')
     teacher = models.ForeignKey(TeacherAccount, on_delete=models.CASCADE, related_name='teacher_tickets', verbose_name='معلم')
@@ -237,6 +253,8 @@ class Ticket(models.Model):
         indexes = [
             models.Index(fields=['status'])
         ]
+
+        # Setting custom permissions for sending tickets and giving response to them
         permissions = [
             (
                 'teacher_response',
