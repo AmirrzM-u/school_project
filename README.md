@@ -2,7 +2,7 @@
 A Django-based website for practicing core Django concepts and fundamentals.
 
 The website includes authentication system for four types of users: student, student’s parent, teacher, and administrator or manager.
-The student user has access to features such as viewing current year and previous years lessons(courses), the current year’s class schedule and report card.
+The student user has access to features such as viewing current year and previous years lessons(courses), the current year’s class schedule and his report card.
 The parent user has capabilities such as reviewing their child’s grades and report card, communicating with the teacher of each of their child’s courses, and sending messages to the desired teacher.
 The teacher user has access to features such as recording grades for their current term students, responding and communicating with students’ parents.
 The manager user has full access and serves as the website administrator.
