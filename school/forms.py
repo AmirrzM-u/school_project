@@ -55,7 +55,7 @@ class TeacherSigninForm(BaseSigninForm):
 class ParentSigninForm(BaseSigninForm):
     student_id = forms.IntegerField(required=True, label='شناسه دانش آموز شما')
 
-    # Overriding the clean method for checking the parents id
+    # Overriding the clean method for checking the parents studnt id
     def clean(self):
         cd = super().clean()
         student_id = cd.get('student_id')
